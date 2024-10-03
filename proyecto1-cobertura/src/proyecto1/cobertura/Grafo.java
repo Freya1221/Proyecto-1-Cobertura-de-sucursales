@@ -8,6 +8,8 @@ package proyecto1.cobertura;
  *
  * @author freya
  */
-public class Grafo {
+public class Grafo{
+    int size;
+    
     
 }
