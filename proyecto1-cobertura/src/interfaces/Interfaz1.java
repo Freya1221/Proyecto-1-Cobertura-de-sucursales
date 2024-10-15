@@ -4,17 +4,27 @@
  */
 package interfaces;
 
+import java.io.File;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author sebas
  */
 public class Interfaz1 extends javax.swing.JFrame {
+//    Auxiliar para mostrar el numero de archivos cargados
+
+    int aux = 0;
 
     /**
      * Creates new form Interfaz1
      */
     public Interfaz1() {
         initComponents();
+
+        setSize(800, 600);
+        setLocationRelativeTo(null);
     }
 
     /**
@@ -29,51 +39,112 @@ public class Interfaz1 extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextPane1 = new javax.swing.JTextPane();
         jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
         btnCargarArchivo = new javax.swing.JButton();
         btnEstablecerT = new javax.swing.JButton();
         TextFieldT = new javax.swing.JTextField();
-        jLabel2 = new javax.swing.JLabel();
+        ConfirmarArchivos = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         TextAreaNuevaLinea = new javax.swing.JTextArea();
         btnAgregarNuevaLinea = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
 
         jScrollPane1.setViewportView(jTextPane1);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(800, 600));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 60, -1, -1));
 
-        jLabel1.setText("Establecer T:");
-        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 150, -1, -1));
-
         btnCargarArchivo.setText("Cargar Archivo");
-        getContentPane().add(btnCargarArchivo, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, -1, -1));
+        btnCargarArchivo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCargarArchivoActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnCargarArchivo, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 200, -1, -1));
 
         btnEstablecerT.setText("Aceptar");
-        getContentPane().add(btnEstablecerT, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 60, -1, -1));
-        getContentPane().add(TextFieldT, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, 80, -1));
+        btnEstablecerT.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEstablecerTActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnEstablecerT, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 270, -1, -1));
 
-        jLabel2.setText("Agregar nueva línea:");
-        getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 130, -1, -1));
+        TextFieldT.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                TextFieldTActionPerformed(evt);
+            }
+        });
+        getContentPane().add(TextFieldT, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 270, 80, -1));
+        getContentPane().add(ConfirmarArchivos, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 200, 180, 30));
 
         TextAreaNuevaLinea.setColumns(20);
         TextAreaNuevaLinea.setRows(5);
         jScrollPane2.setViewportView(TextAreaNuevaLinea);
 
-        getContentPane().add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 160, 240, 150));
+        getContentPane().add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 350, 240, 150));
 
         btnAgregarNuevaLinea.setText("Agregar Línea");
-        getContentPane().add(btnAgregarNuevaLinea, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 320, 240, -1));
+        getContentPane().add(btnAgregarNuevaLinea, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 510, 240, -1));
 
         jLabel3.setText("Establecer T:");
-        getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 40, -1, -1));
+        getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 240, -1, -1));
+
+        jLabel4.setText("Agregar nueva línea:");
+        getContentPane().add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 320, 190, 30));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnCargarArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarArchivoActionPerformed
+        // Con este boton se programa la funcion de cargar los archivos json necesarios para el programa:
+        JFileChooser fileChooser = new JFileChooser();
+        int option = fileChooser.showOpenDialog(this);
+
+        if (aux == 2) {
+            JOptionPane.showMessageDialog(null, "Límite de archivos alcanzado");
+        } else {
+            if (option == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                String filePath = selectedFile.getAbsolutePath();
+
+                if (filePath.endsWith(".json")) {
+                    JOptionPane.showMessageDialog(this, "Archivo JSON seleccionado> " + filePath);
+                    aux++;
+                    if (aux > 1) {
+                        ConfirmarArchivos.setText(aux + " archivos cargados");
+                        
+                    } else {
+                        ConfirmarArchivos.setText(aux + " archivo cargado");
+                        
+                    }
+
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error: El archivo seleccionado no es un archivo JSON", "Error de archivo", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+    }//GEN-LAST:event_btnCargarArchivoActionPerformed
+
+    private void btnEstablecerTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEstablecerTActionPerformed
+        // Establecer T:
+        try {
+            int T = Integer.parseInt(TextFieldT.getText());
+        } catch(Exception e){
+            
+        }
+        
+        
+        
+    }//GEN-LAST:event_btnEstablecerTActionPerformed
+
+    private void TextFieldTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TextFieldTActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_TextFieldTActionPerformed
 
     /**
      * @param args the command line arguments
@@ -111,14 +182,14 @@ public class Interfaz1 extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel ConfirmarArchivos;
     private javax.swing.JTextArea TextAreaNuevaLinea;
     private javax.swing.JTextField TextFieldT;
     private javax.swing.JButton btnAgregarNuevaLinea;
     private javax.swing.JButton btnCargarArchivo;
     private javax.swing.JButton btnEstablecerT;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;

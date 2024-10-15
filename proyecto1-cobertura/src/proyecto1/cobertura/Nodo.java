@@ -9,10 +9,10 @@ package proyecto1.cobertura;
  * @author freya
  */
 public class Nodo {
-    String sucursal;
-    String cubierto;
-    String nombre;
-    Nodo next;
+    private String sucursal;
+    private String cubierto;
+    private String nombre;
+    private Nodo next;
 
     public Nodo(String sucursal, String cubierto, String nombre) {
         this.sucursal = sucursal;
