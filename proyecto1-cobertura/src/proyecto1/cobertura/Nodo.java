@@ -9,50 +9,30 @@ package proyecto1.cobertura;
  * @author freya
  */
 public class Nodo {
-    private String sucursal;
-    private String cubierto;
-    private String nombre;
+    private Estacion estacion;
     private Nodo next;
 
-    public Nodo(String sucursal, String cubierto, String nombre) {
-        this.sucursal = sucursal;
-        this.cubierto = cubierto;
-        this.nombre = nombre;
+    public Nodo(Estacion estacion) {
+        this.estacion = estacion;
         this.next = null;
-   
     }
 
-    public String getSucursal() {
-        return sucursal;
+    public Estacion getEstacion() {
+        return estacion;
     }
 
-    public void setSucursal(String sucursal) {
-        this.sucursal = sucursal;
-    }
-
-    public String getCubierto() {
-        return cubierto;
-    }
-
-    public void setCubierto(String cubierto) {
-        this.cubierto = cubierto;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setEstacion(Estacion estacion) {
+        this.estacion = estacion;
     }
 
     public Nodo getNext() {
         return next;
     }
 
-    public void setNext(Nodo next) {
-        this.next = next;
+    public void setNext(Nodo siguiente) {
+        this.next = siguiente;
     }
     
     
+      
 }
