@@ -13,9 +13,9 @@ public class Estacion {
     private Boolean cubierto;
     private String nombre;
 
-    public Estacion(String sucursal, Boolean cubierto, String nombre) {
+    public Estacion(String sucursal, String nombre) {
         this.sucursal = sucursal;
-        this.cubierto = cubierto;
+        this.cubierto = false;
         this.nombre = nombre;
     }
 

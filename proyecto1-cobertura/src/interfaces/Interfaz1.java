@@ -1,6 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+/**
+ * Interfaz1 es una clase que representa una interfaz gráfica de usuario
+ * para cargar y procesar archivos JSON. Permite al usuario seleccionar un archivo
+ * JSON, leer su contenido y establecer un valor T a través de un campo de texto.
+ *
+ * @author sarriaga0103
  */
 package interfaces;
 
@@ -10,6 +13,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import proyecto1.cobertura.Estacion;
+import proyecto1.cobertura.Grafo;
+import proyecto1.cobertura.Lista;
+import proyecto1.cobertura.ListaArray.ListaArray;
 
 /**
  *
@@ -43,7 +50,7 @@ public class Interfaz1 extends javax.swing.JFrame {
         btnAgregarNuevaLinea = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
 
         jScrollPane1.setViewportView(jTextPane1);
 
@@ -98,9 +105,9 @@ public class Interfaz1 extends javax.swing.JFrame {
         jLabel5.setText("Cobertura de Sucursales");
         getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 10, 450, 80));
 
-        jLabel6.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel6.setText("Agregar nueva línea:");
-        getContentPane().add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 280, 190, 30));
+        jLabel7.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel7.setText("Agregar nueva línea:");
+        getContentPane().add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 280, 190, 30));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -119,6 +126,7 @@ public class Interfaz1 extends javax.swing.JFrame {
                 try {
                     String contenidoJson = leerArchivoJson(filePath);
                     parsearJson(contenidoJson);
+
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(this, "Error al leer el archivo: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -130,20 +138,79 @@ public class Interfaz1 extends javax.swing.JFrame {
 
     private String leerArchivoJson(String filePath) throws IOException {
 //  Con este metodo busco transcribir el archivo json de forma tal que pueda utilizar su informacion
-    StringBuilder contenidoJson = new StringBuilder();
-    try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-        String linea;
-        while ((linea = reader.readLine()) != null) {
+        StringBuilder contenidoJson = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String linea;
+            while ((linea = reader.readLine()) != null) {
 //            se agrega el salto de linea para mantener el formato original del archivo
-            contenidoJson.append(linea).append("\n");
+                contenidoJson.append(linea).append("\n");
+            }
+        }
+        JOptionPane.showMessageDialog(null, "Arhivo cargado con éxito");
+        return contenidoJson.toString();
+    }
+
+    private void parsearJson(String contenidoJson) {
+        // Limpiar el contenido para evitar errores de formato
+        contenidoJson = contenidoJson.replaceAll("\\s+", ""); // Eliminar espacios en blanco
+        contenidoJson = contenidoJson.replaceAll("\\n", ""); // Eliminar saltos de línea
+
+        // Extraer las líneas de metro
+        String[] lineas = contenidoJson.split("\\},\\{");
+
+        ListaArray grafos = new ListaArray(lineas.length);
+
+        for (String linea : lineas) {
+            // Extraer el nombre de la línea y las estaciones
+            String nombreLinea = linea.split(":")[0].replaceAll("[\"{}]", "");
+            String[] estaciones = linea.split(":")[1].replaceAll("[\\[\\]]", "").split(",");
+
+            // Crear un nuevo grafo para la línea actual
+            Grafo grafo = new Grafo();
+
+            // Agregar estaciones al grafo
+            for (String estacion : estaciones) {
+                String nombreEstacion;
+
+                // Verificar si la estación es un objeto o un string
+                if (estacion.contains("{")) {
+                    // Extraer el nombre de la estación del objeto
+                    String[] partes = estacion.split(":");
+                    nombreEstacion = partes[0].replaceAll("[\"{}]", "");
+                } else {
+                    nombreEstacion = estacion.replaceAll("[\"{}]", "");
+                    
+                    grafo.addEstacion(nombreLinea, nombreEstacion);
+                }
+
+                // Añadir la estación al grafo
+//                grafo.addEstacion(nombreLinea, nombreEstacion); // Agregar estación al grafo
+            }
+
+            // Inicializar la matriz de adyacencia
+            grafo.inicializarMatriz(grafo.getEstaciones().getSize());
+
+            // Establecer conexiones entre estaciones en la misma línea
+            for (int i = 0; i < estaciones.length - 1; i++) {
+                String nombreEstacion1 = estaciones[i].replaceAll("[\"{}]", "");
+                String nombreEstacion2 = estaciones[i + 1].replaceAll("[\"{}]", "");
+                grafo.agregarConexion(nombreEstacion1, nombreEstacion2); // Conectar las estaciones
+            }
+
+            // Agregar el grafo de la línea a la lista de grafos
+//            grafo.printMatriz();
+//            System.out.println("");
+            grafos.insertFinal(grafo);
+        }
+
+        // Imprimir las matrices de adyacencia para verificar
+        for (int i = 0; i < grafos.getSize(); i++) {
+            Grafo g = (Grafo) grafos.getArray()[i].getElement();
+            g.printMatriz();
         }
     }
-    return contenidoJson.toString();
-}
-    
-    private void parsearJson(String contenidoJson) {
-}
-    
+
+
     private void btnEstablecerTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEstablecerTActionPerformed
         // Establecer T:
         try {
@@ -203,7 +270,7 @@ public class Interfaz1 extends javax.swing.JFrame {
     private javax.swing.JButton btnEstablecerT;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
