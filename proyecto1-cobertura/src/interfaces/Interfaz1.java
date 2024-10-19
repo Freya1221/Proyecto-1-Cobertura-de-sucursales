@@ -13,9 +13,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import proyecto1.cobertura.Estacion;
 import proyecto1.cobertura.Grafo;
-import proyecto1.cobertura.Lista;
 import proyecto1.cobertura.ListaArray.ListaArray;
 
 /**
@@ -150,20 +148,29 @@ public class Interfaz1 extends javax.swing.JFrame {
         return contenidoJson.toString();
     }
 
-    private void parsearJson(String contenidoJson) {
+    public void parsearJson(String contenidoJson) {
         // Limpiar el contenido para evitar errores de formato
         contenidoJson = contenidoJson.replaceAll("\\s+", ""); // Eliminar espacios en blanco
         contenidoJson = contenidoJson.replaceAll("\\n", ""); // Eliminar saltos de línea
 
-        // Extraer las líneas de metro
+        // Extraer el contenido de "Metro de Caracas"
         String[] lineas = contenidoJson.split("\\},\\{");
 
+        // Limpiar el inicio y final para manejar bordes del JSON
+        lineas[0] = lineas[0].replace("{\"MetrodeCaracas\":[{", "");
+        lineas[lineas.length - 1] = lineas[lineas.length - 1].replace("}]}", "");
+
+        // Lista para almacenar los grafos de cada línea
         ListaArray grafos = new ListaArray(lineas.length);
 
+        // Iterar sobre cada línea del metro
         for (String linea : lineas) {
-            // Extraer el nombre de la línea y las estaciones
-            String nombreLinea = linea.split(":")[0].replaceAll("[\"{}]", "");
-            String[] estaciones = linea.split(":")[1].replaceAll("[\\[\\]]", "").split(",");
+            // Separar el nombre de la línea de sus estaciones
+            String nombreLinea = linea.split(":\\[")[0].replaceAll("[\"{}]", ""); // Extraer nombre de la línea
+            System.out.println("Procesando " + nombreLinea);
+
+            String estacionesRaw = linea.split(":\\[")[1].replaceAll("\\]", ""); // Extraer las estaciones crudas
+            String[] estaciones = estacionesRaw.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"); // Manejar bien las comas dentro de objetos
 
             // Crear un nuevo grafo para la línea actual
             Grafo grafo = new Grafo();
@@ -172,44 +179,80 @@ public class Interfaz1 extends javax.swing.JFrame {
             for (String estacion : estaciones) {
                 String nombreEstacion;
 
-                // Verificar si la estación es un objeto o un string
+                // Verificar si es una estación con una conexión (objeto)
                 if (estacion.contains("{")) {
-                    // Extraer el nombre de la estación del objeto
-                    String[] partes = estacion.split(":");
-                    nombreEstacion = partes[0].replaceAll("[\"{}]", "");
+                    // Estación con conexión, manejar el objeto manualmente
+                    String[] estacion1 = estacion.replaceAll("[\"{}]", "").split(":");
+                    nombreEstacion = estacion1[0];
+
+                    // Agregar ambas estaciones y su conexión
+                    System.out.println("Estación: " + nombreEstacion);
+                    grafo.addEstacion(nombreLinea, nombreEstacion);
                 } else {
+                    // Estación normal
                     nombreEstacion = estacion.replaceAll("[\"{}]", "");
-                    
+                    System.out.println("Estación: " + nombreEstacion);
                     grafo.addEstacion(nombreLinea, nombreEstacion);
                 }
-
-                // Añadir la estación al grafo
-//                grafo.addEstacion(nombreLinea, nombreEstacion); // Agregar estación al grafo
             }
 
-            // Inicializar la matriz de adyacencia
+            // Inicializar la matriz de adyacencia para la línea actual
             grafo.inicializarMatriz(grafo.getEstaciones().getSize());
 
-            // Establecer conexiones entre estaciones en la misma línea
-            for (int i = 0; i < estaciones.length - 1; i++) {
-                String nombreEstacion1 = estaciones[i].replaceAll("[\"{}]", "");
-                String nombreEstacion2 = estaciones[i + 1].replaceAll("[\"{}]", "");
-                grafo.agregarConexion(nombreEstacion1, nombreEstacion2); // Conectar las estaciones
+            // Establecer conexiones entre estaciones consecutivas
+            for (int j = 0; j < estaciones.length - 1; j++) {
+                String estacion1 = estaciones[j].replaceAll("[\"{}]", "");
+                String estacion2 = estaciones[j + 1].replaceAll("[\"{}]", "");
+
+                if (!estacion1.contains(":") && !estacion2.contains(":")) {
+                    // Conectar estaciones solo si no tienen conexiones especiales
+                    grafo.agregarConexion(estacion1, estacion2);
+                } else {
+                    if (estacion1.contains(":") && estacion2.contains(":")) {
+                        // Ambos tienen dos estaciones conectadas
+                        String[] partes1 = estacion1.split(":");
+                        String estacionLinea1A = partes1[0];  // Estación que pertenece a esta línea
+                        String estacionLinea2A = partes1[1];  // Estación de la otra línea
+
+                        String[] partes2 = estacion2.split(":");
+                        String estacionLinea1B = partes2[0];  // Estación que pertenece a esta línea
+                        String estacionLinea2B = partes2[1];  // Estación de la otra línea
+
+                        // Conectar las estaciones de la misma línea
+                        grafo.agregarConexion(estacionLinea1A, estacionLinea1B);
+                    } else if (estacion1.contains(":")) {
+                        // Solo la primera estación tiene una conexión especial
+                        String[] partes1 = estacion1.split(":");
+                        String estacionLinea1 = partes1[0];  // Estación que pertenece a esta línea
+                        String estacionLinea2 = partes1[1];  // Estación de la otra línea
+
+                        // Conectar la estación de esta línea con la siguiente estación
+                        grafo.agregarConexion(estacionLinea1, estacion2);
+                    } else {
+                        // Solo la segunda estación tiene una conexión especial
+                        String[] partes2 = estacion2.split(":");
+                        String estacionLinea1 = partes2[0];  // Estación que pertenece a esta línea
+                        String estacionLinea2 = partes2[1];  // Estación de la otra línea
+
+                        // Conectar la primera estación con la estación de esta línea en la conexión especial
+                        grafo.agregarConexion(estacion1, estacionLinea1);
+
+                    }
+
+                }
             }
 
             // Agregar el grafo de la línea a la lista de grafos
-//            grafo.printMatriz();
-//            System.out.println("");
             grafos.insertFinal(grafo);
         }
 
-        // Imprimir las matrices de adyacencia para verificar
+        // Imprimir las matrices de adyacencia para cada línea
         for (int i = 0; i < grafos.getSize(); i++) {
             Grafo g = (Grafo) grafos.getArray()[i].getElement();
             g.printMatriz();
+            System.out.println("");
         }
     }
-
 
     private void btnEstablecerTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEstablecerTActionPerformed
         // Establecer T:
