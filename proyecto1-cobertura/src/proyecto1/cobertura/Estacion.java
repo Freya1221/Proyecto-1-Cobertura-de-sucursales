@@ -1,13 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+/**
+ * Clase Estación para trabajar con cada estación de ambos sistemas
+ * 
+ * @author Sebastián Arriaga
  */
+
 package proyecto1.cobertura;
 
-/**
- *
- * @author sebas
- */
+
 public class Estacion {
     private String sucursal;
     private Boolean cubierto;

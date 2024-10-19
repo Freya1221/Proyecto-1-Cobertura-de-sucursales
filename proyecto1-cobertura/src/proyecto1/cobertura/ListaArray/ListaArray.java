@@ -1,13 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+/**
+ * Clase ListaArray junto con sus primitivas
+ * 
+ * @author Sebastián Arriaga
  */
+
 package proyecto1.cobertura.ListaArray;
 
-/**
- *
- * @author sebas
- */
 public class ListaArray {
     private Integer head;
     private NodoArray[] array;

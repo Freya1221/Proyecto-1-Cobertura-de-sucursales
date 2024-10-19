@@ -1,13 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+/**
+ * Clase Lista junto con sus primitivas
+ * 
+ * @author Sebastián Arriaga
  */
+
 package proyecto1.cobertura;
 
-/**
- *
- * @author sebas
- */
 public class Lista{
     
     private Nodo head;

@@ -1,14 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+/**
+ * En esta clase grafo se diseña un grafo de tipo matriz adyacente, junto con todos sus métodos
+ * 
+ * @author Sebastián Arriaga
  */
+
 package proyecto1.cobertura;
 
 
-/**
- *
- * @author sebas
- */
+
 public class Grafo {
 
     private Lista estaciones;

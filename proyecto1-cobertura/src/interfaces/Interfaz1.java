@@ -3,8 +3,9 @@
  * para cargar y procesar archivos JSON. Permite al usuario seleccionar un archivo
  * JSON, leer su contenido y establecer un valor T a través de un campo de texto.
  *
- * @author sarriaga0103
+ * @author Sebastián Arriaga
  */
+
 package interfaces;
 
 import java.io.BufferedReader;
@@ -21,16 +22,19 @@ import proyecto1.cobertura.ListaArray.ListaArray;
  * @author sebas
  */
 public class Interfaz1 extends javax.swing.JFrame {
-//    Auxiliar para mostrar el numero de archivos cargados
 
     /**
      * Creates new form Interfaz1
      */
     public Interfaz1() {
+
         initComponents();
 
         setSize(800, 600);
         setLocationRelativeTo(null);
+        LabelT.setVisible(false);
+        btnEstablecerT.setVisible(false);
+        TextFieldT.setVisible(false);
     }
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -46,9 +50,10 @@ public class Interfaz1 extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         TextAreaNuevaLinea = new javax.swing.JTextArea();
         btnAgregarNuevaLinea = new javax.swing.JButton();
-        jLabel3 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
+        TextArchivoCargado = new javax.swing.JLabel();
+        LabelT = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
 
         jScrollPane1.setViewportView(jTextPane1);
 
@@ -66,23 +71,22 @@ public class Interfaz1 extends javax.swing.JFrame {
                 btnCargarArchivoActionPerformed(evt);
             }
         });
-        getContentPane().add(btnCargarArchivo, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 160, -1, -1));
+        getContentPane().add(btnCargarArchivo, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 130, -1, -1));
 
-        btnEstablecerT.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        btnEstablecerT.setText("Aceptar");
+        btnEstablecerT.setText("OK");
         btnEstablecerT.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnEstablecerTActionPerformed(evt);
             }
         });
-        getContentPane().add(btnEstablecerT, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 270, -1, -1));
+        getContentPane().add(btnEstablecerT, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 50, 50, 20));
 
         TextFieldT.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 TextFieldTActionPerformed(evt);
             }
         });
-        getContentPane().add(TextFieldT, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 270, 130, 30));
+        getContentPane().add(TextFieldT, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 50, 50, -1));
         getContentPane().add(ConfirmarArchivos, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 200, 180, 30));
 
         TextAreaNuevaLinea.setColumns(20);
@@ -95,17 +99,20 @@ public class Interfaz1 extends javax.swing.JFrame {
         btnAgregarNuevaLinea.setText("Agregar Línea");
         getContentPane().add(btnAgregarNuevaLinea, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 510, 280, -1));
 
-        jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel3.setText("Establecer T:");
-        getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 240, -1, -1));
-
         jLabel5.setFont(new java.awt.Font("Franklin Gothic Medium", 1, 36)); // NOI18N
         jLabel5.setText("Cobertura de Sucursales");
-        getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 10, 450, 80));
+        getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 20, 450, 80));
 
-        jLabel7.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel7.setText("Agregar nueva línea:");
-        getContentPane().add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 280, 190, 30));
+        TextArchivoCargado.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        getContentPane().add(TextArchivoCargado, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 130, 190, 30));
+
+        LabelT.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        LabelT.setText("Valor T:");
+        getContentPane().add(LabelT, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 20, 70, -1));
+
+        jLabel8.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel8.setText("Agregar nueva línea:");
+        getContentPane().add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 280, 190, 30));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -155,9 +162,10 @@ public class Interfaz1 extends javax.swing.JFrame {
 
         // Extraer el contenido de "Metro de Caracas"
         String[] lineas = contenidoJson.split("\\},\\{");
+        String nombreSistema = contenidoJson.substring(contenidoJson.indexOf("{\"") + 2, contenidoJson.indexOf("\":[{"));
 
         // Limpiar el inicio y final para manejar bordes del JSON
-        lineas[0] = lineas[0].replace("{\"MetrodeCaracas\":[{", "");
+        lineas[0] = lineas[0].replace("{\"" + nombreSistema + "\":[{", "");
         lineas[lineas.length - 1] = lineas[lineas.length - 1].replace("}]}", "");
 
         // Lista para almacenar los grafos de cada línea
@@ -215,24 +223,24 @@ public class Interfaz1 extends javax.swing.JFrame {
                         String estacionLinea2A = partes1[1];  // Estación de la otra línea
 
                         String[] partes2 = estacion2.split(":");
-                        String estacionLinea1B = partes2[0];  // Estación que pertenece a esta línea
-                        String estacionLinea2B = partes2[1];  // Estación de la otra línea
+                        String estacionLinea1B = partes2[0];
+                        String estacionLinea2B = partes2[1];
 
                         // Conectar las estaciones de la misma línea
                         grafo.agregarConexion(estacionLinea1A, estacionLinea1B);
                     } else if (estacion1.contains(":")) {
                         // Solo la primera estación tiene una conexión especial
                         String[] partes1 = estacion1.split(":");
-                        String estacionLinea1 = partes1[0];  // Estación que pertenece a esta línea
-                        String estacionLinea2 = partes1[1];  // Estación de la otra línea
+                        String estacionLinea1 = partes1[0];
+                        String estacionLinea2 = partes1[1];
 
                         // Conectar la estación de esta línea con la siguiente estación
                         grafo.agregarConexion(estacionLinea1, estacion2);
                     } else {
                         // Solo la segunda estación tiene una conexión especial
                         String[] partes2 = estacion2.split(":");
-                        String estacionLinea1 = partes2[0];  // Estación que pertenece a esta línea
-                        String estacionLinea2 = partes2[1];  // Estación de la otra línea
+                        String estacionLinea1 = partes2[0];
+                        String estacionLinea2 = partes2[1];
 
                         // Conectar la primera estación con la estación de esta línea en la conexión especial
                         grafo.agregarConexion(estacion1, estacionLinea1);
@@ -244,8 +252,10 @@ public class Interfaz1 extends javax.swing.JFrame {
 
             // Agregar el grafo de la línea a la lista de grafos
             grafos.insertFinal(grafo);
+            
         }
-
+        TextArchivoCargado.setText("Archivo cargado");
+        establecerValorTSistema(nombreSistema);
         // Imprimir las matrices de adyacencia para cada línea
         for (int i = 0; i < grafos.getSize(); i++) {
             Grafo g = (Grafo) grafos.getArray()[i].getElement();
@@ -254,19 +264,41 @@ public class Interfaz1 extends javax.swing.JFrame {
         }
     }
 
+// Método que establece el valor de t según el sistema de transporte cargado
+    int t;
+
+    public void establecerValorTSistema(String nombreSistema) {
+        t = switch (nombreSistema.toLowerCase()) {
+            case "metrodecaracas" ->
+                3;
+            case "transmilenio" ->
+                10;
+            default ->
+                0;
+        }; // Valor por defecto si no se reconoce el sistema
+
+        // Mostrar el valor de 't' en el textField
+        TextFieldT.setText(String.valueOf(t));
+
+        // Hacer visibles los componentes después de cargar el sistema
+        LabelT.setVisible(true);
+        TextFieldT.setVisible(true);
+        btnEstablecerT.setVisible(true);
+    }
+
+
     private void btnEstablecerTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEstablecerTActionPerformed
-        // Establecer T:
         try {
-            int T = Integer.parseInt(TextFieldT.getText());
-        } catch (Exception e) {
-
+            int nuevoT = Integer.parseInt(TextFieldT.getText());
+            t = nuevoT;  // Actualizar el valor de t
+            System.out.println("Valor de t actualizado a: " + t);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Por favor ingresa un número entero válido.");
         }
-
-
     }//GEN-LAST:event_btnEstablecerTActionPerformed
 
     private void TextFieldTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TextFieldTActionPerformed
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_TextFieldTActionPerformed
 
     /**
@@ -306,14 +338,15 @@ public class Interfaz1 extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel ConfirmarArchivos;
+    private javax.swing.JLabel LabelT;
+    private javax.swing.JLabel TextArchivoCargado;
     private javax.swing.JTextArea TextAreaNuevaLinea;
     private javax.swing.JTextField TextFieldT;
     private javax.swing.JButton btnAgregarNuevaLinea;
     private javax.swing.JButton btnCargarArchivo;
     private javax.swing.JButton btnEstablecerT;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;

@@ -1,13 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+/**
+ * Clase nodo para trabajar las listas
+ * 
+ * @author Sebastián Arriaga
  */
+
 package proyecto1.cobertura;
 
-/**
- *
- * @author freya
- */
+
 public class Nodo {
     private Estacion estacion;
     private Nodo next;

@@ -1,13 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+/**
+ * Clase NodoArray para trabajar las listas array
+ * 
+ * @author Sebastián Arriaga
  */
+
 package proyecto1.cobertura.ListaArray;
 
-/**
- *
- * @author sebas
- */
 public class NodoArray {
     private Object element;
     private Integer next;
