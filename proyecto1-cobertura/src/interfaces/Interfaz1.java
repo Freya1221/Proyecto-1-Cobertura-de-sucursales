@@ -42,6 +42,7 @@ public class Interfaz1 extends javax.swing.JFrame {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextPane1 = new javax.swing.JTextPane();
+        jDialog1 = new javax.swing.JDialog();
         jPanel1 = new javax.swing.JPanel();
         btnCargarArchivo = new javax.swing.JButton();
         btnEstablecerT = new javax.swing.JButton();
@@ -58,6 +59,9 @@ public class Interfaz1 extends javax.swing.JFrame {
         jScrollPane1.setViewportView(jTextPane1);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setAutoRequestFocus(false);
+        setBackground(new java.awt.Color(255, 255, 255));
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setPreferredSize(new java.awt.Dimension(800, 600));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -79,7 +83,7 @@ public class Interfaz1 extends javax.swing.JFrame {
                 btnEstablecerTActionPerformed(evt);
             }
         });
-        getContentPane().add(btnEstablecerT, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 50, 50, 20));
+        getContentPane().add(btnEstablecerT, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 50, 60, 20));
 
         TextFieldT.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -97,6 +101,11 @@ public class Interfaz1 extends javax.swing.JFrame {
 
         btnAgregarNuevaLinea.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnAgregarNuevaLinea.setText("Agregar Línea");
+        btnAgregarNuevaLinea.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAgregarNuevaLineaActionPerformed(evt);
+            }
+        });
         getContentPane().add(btnAgregarNuevaLinea, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 510, 280, -1));
 
         jLabel5.setFont(new java.awt.Font("Franklin Gothic Medium", 1, 36)); // NOI18N
@@ -252,7 +261,7 @@ public class Interfaz1 extends javax.swing.JFrame {
 
             // Agregar el grafo de la línea a la lista de grafos
             grafos.insertFinal(grafo);
-            
+            grafo.visualizarGrafo();
         }
         TextArchivoCargado.setText("Archivo cargado");
         establecerValorTSistema(nombreSistema);
@@ -301,6 +310,10 @@ public class Interfaz1 extends javax.swing.JFrame {
 
     }//GEN-LAST:event_TextFieldTActionPerformed
 
+    private void btnAgregarNuevaLineaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarNuevaLineaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnAgregarNuevaLineaActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -345,6 +358,7 @@ public class Interfaz1 extends javax.swing.JFrame {
     private javax.swing.JButton btnAgregarNuevaLinea;
     private javax.swing.JButton btnCargarArchivo;
     private javax.swing.JButton btnEstablecerT;
+    private javax.swing.JDialog jDialog1;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
