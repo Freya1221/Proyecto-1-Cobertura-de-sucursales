@@ -14,7 +14,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import proyecto1.cobertura.Estacion;
 import proyecto1.cobertura.Grafo;
+import proyecto1.cobertura.Lista;
 import proyecto1.cobertura.ListaArray.ListaArray;
 
 /**
@@ -168,6 +170,7 @@ public class Interfaz1 extends javax.swing.JFrame {
         // Limpiar el contenido para evitar errores de formato
         contenidoJson = contenidoJson.replaceAll("\\s+", ""); // Eliminar espacios en blanco
         contenidoJson = contenidoJson.replaceAll("\\n", ""); // Eliminar saltos de línea
+        Lista nombresLineas = new Lista();
 
         // Extraer el contenido de "Metro de Caracas"
         String[] lineas = contenidoJson.split("\\},\\{");
@@ -184,6 +187,7 @@ public class Interfaz1 extends javax.swing.JFrame {
         for (String linea : lineas) {
             // Separar el nombre de la línea de sus estaciones
             String nombreLinea = linea.split(":\\[")[0].replaceAll("[\"{}]", ""); // Extraer nombre de la línea
+            nombresLineas.insertFinal(new Estacion(nombreLinea));
             System.out.println("Procesando " + nombreLinea);
 
             String estacionesRaw = linea.split(":\\[")[1].replaceAll("\\]", ""); // Extraer las estaciones crudas
@@ -261,8 +265,8 @@ public class Interfaz1 extends javax.swing.JFrame {
 
             // Agregar el grafo de la línea a la lista de grafos
             grafos.insertFinal(grafo);
-            grafo.visualizarGrafo();
         }
+        
         TextArchivoCargado.setText("Archivo cargado");
         establecerValorTSistema(nombreSistema);
         // Imprimir las matrices de adyacencia para cada línea
@@ -271,6 +275,7 @@ public class Interfaz1 extends javax.swing.JFrame {
             g.printMatriz();
             System.out.println("");
         }
+        VisualizarGrafo.inicializarVentanaConGrafos(grafos, nombresLineas);
     }
 
 // Método que establece el valor de t según el sistema de transporte cargado

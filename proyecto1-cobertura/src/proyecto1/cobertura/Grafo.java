@@ -127,5 +127,31 @@ public class Grafo {
         // Visualizar el grafo
         graph.display();
     }
+    
+    public Graph toGraphStream() {
+        Graph graph = new SingleGraph("Grafo del sistema de transporte");
+
+        // Agregar nodos (estaciones) al grafo de GraphStream
+        for (int i = 0; i < estaciones.getSize(); i++) {
+            Estacion estacion = estaciones.obtener(i);
+            graph.addNode(estacion.getNombre()).setAttribute("ui.label", estacion.getNombre());
+        }
+
+        // Agregar aristas (conexiones) según la matriz de adyacencia
+        for (int i = 0; i < numVertices; i++) {
+            for (int j = 0; j < numVertices; j++) {
+                if (matrizAdyacencia[i][j] == 1) {
+                    String nombre1 = estaciones.obtener(i).getNombre();
+                    String nombre2 = estaciones.obtener(j).getNombre();
+                    // Evitar duplicar aristas
+                    if (graph.getEdge(nombre1 + "-" + nombre2) == null && graph.getEdge(nombre2 + "-" + nombre1) == null) {
+                        graph.addEdge(nombre1 + "-" + nombre2, nombre1, nombre2);
+                    }
+                }
+            }
+        }
+        
+        return graph;  // Retorna el grafo compatible con GraphStream
+    }
 
 }

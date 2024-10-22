@@ -6,10 +6,17 @@ package interfaces;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import org.graphstream.graph.*;
-import org.graphstream.graph.implementations.*;
-import proyecto1.cobertura.ListaArray.*;
+import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
+import org.graphstream.ui.view.View;
+import proyecto1.cobertura.Grafo;
+import proyecto1.cobertura.Lista;
+import proyecto1.cobertura.ListaArray.ListaArray; 
+import proyecto1.cobertura.Nodo;
+import org.graphstream.ui.view.Viewer;
+import org.graphstream.ui.view.camera.Camera;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 /**
  *
@@ -17,66 +24,52 @@ import proyecto1.cobertura.ListaArray.*;
  */
 public class VisualizarGrafo extends JFrame {
 
+    private Viewer viewerActual;
+    private boolean mousePressed = false;
     private ListaArray listaGrafos;
     private JComboBox<String> selectorGrafos;
+    private Lista lineas;
+    private JScrollPane scrollPane;
 
-    public VisualizarGrafo() {
-        // Configuración de la ventana principal
+    // Constructor que recibe la lista de grafos y el array de líneas del JSON
+    public VisualizarGrafo(ListaArray listaGrafos, Lista lineas) {
+        // Inicializar los componentes
+        this.listaGrafos = listaGrafos;
+        this.lineas = lineas;
         setTitle("Visualizador de Grafos");
-        setSize(600, 400);
+        setSize(800, 600);  // Ajustamos el tamaño de la ventana
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // Inicializar la lista de grafos usando tu estructura personalizada
-//        EJEMPLO DE ESTRUCTURA PARA GUIARME
-        listaGrafos = new ListaArray(10); 
-
-        
-        Graph grafo1 = crearGrafoEjemplo("Línea 1", "Estacion A", "Estacion B", "Estacion C");
-        Graph grafo2 = crearGrafoEjemplo("Línea 2", "Estacion X", "Estacion Y", "Estacion Z");
-
-        // Insertar los grafos en la lista personalizada
-        listaGrafos.insertFinal(grafo1);
-        listaGrafos.insertFinal(grafo2);
-
-        // Crear los componentes de la interfaz
+        // Crear componentes de la interfaz
         JPanel panelSeleccion = new JPanel();
         selectorGrafos = new JComboBox<>();
-        selectorGrafos.addItem("Línea 1");
-        selectorGrafos.addItem("Línea 2");
-
         JButton botonMostrar = new JButton("Mostrar Grafo");
 
-        // Agregar el selector y el botón al panel de selección
+        // Llenar el ComboBox con los nombres de las líneas del JSON
+        llenarSelectorConLineas();
+
+        // Añadir los componentes al panel
         panelSeleccion.add(selectorGrafos);
         panelSeleccion.add(botonMostrar);
 
-        // Añadir un escuchador al botón
-        botonMostrar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mostrarGrafoSeleccionado();
-            }
-        });
+        // Añadir escuchador al botón
+        botonMostrar.addActionListener(e -> mostrarGrafoSeleccionado());
 
-        // Configurar el layout y añadir el panel de selección
+        // Configurar el layout y añadir el panel
         setLayout(new BorderLayout());
         add(panelSeleccion, BorderLayout.NORTH);
 
-        // Mostrar la ventana
+        // Mostrar la ventana principal
         setVisible(true);
     }
 
-    // Método para crear un grafo de ejemplo con estaciones y líneas
-    private Graph crearGrafoEjemplo(String nombre, String... estaciones) {
-        Graph graph = new SingleGraph(nombre);
-
-        for (String estacion : estaciones) {
-            graph.addNode(estacion);
+    // Método para llenar el ComboBox con los nombres de las líneas
+    private void llenarSelectorConLineas() {
+        Nodo pointer = lineas.getHead();
+        while (pointer!= null){
+            selectorGrafos.addItem(pointer.getEstacion().getSucursal());
+            pointer = pointer.getNext();
         }
-        for (int i = 0; i < estaciones.length - 1; i++) {
-            graph.addEdge(estaciones[i] + "_" + estaciones[i + 1], estaciones[i], estaciones[i + 1]);
-        }
-        return graph;
     }
 
     // Método para mostrar el grafo seleccionado
@@ -84,27 +77,96 @@ public class VisualizarGrafo extends JFrame {
         String lineaSeleccionada = (String) selectorGrafos.getSelectedItem();
 
         if (lineaSeleccionada != null) {
-            Graph grafoSeleccionado = null;
+            Grafo grafoSeleccionado = null;
 
-            // Buscar el grafo en la lista personalizada
-            if (lineaSeleccionada.equals("Línea 1")) {
-                grafoSeleccionado = (Graph) listaGrafos.getArray()[0].getElement();
-            } else if (lineaSeleccionada.equals("Línea 2")) {
-                grafoSeleccionado = (Graph) listaGrafos.getArray()[1].getElement();
+            // Buscar el grafo correspondiente en la lista
+            for (int i = 0; i < listaGrafos.getSize(); i++) {
+                Grafo grafo = (Grafo) listaGrafos.getArray()[i].getElement();
+                if (grafo.getEstaciones().getHead().getEstacion().getSucursal().equals(lineaSeleccionada)) {
+                    grafoSeleccionado = grafo;
+                    break;
+                }
             }
 
+            // Si se encuentra el grafo
             if (grafoSeleccionado != null) {
-                grafoSeleccionado.display();
+                Graph graphStream = grafoSeleccionado.toGraphStream();  // Convertir a GraphStream
+                System.setProperty("org.graphstream.ui", "swing");  // Usar Swing
+
+                // Cerrar el viewer anterior si existe
+                if (viewerActual != null) {
+                    viewerActual.close();  // Cerrar la vista previa
+                }
+
+                // Crear un nuevo viewer para el grafo
+                viewerActual = graphStream.display(false);  // Modo "no threading"
+
+                viewerActual.disableAutoLayout();  // Desactivar auto layout
+
+                // Asignar posiciones manuales para los nodos en una línea recta
+                asignarPosicionesLineales(graphStream);
+
+                // Obtener la vista principal
+                View view = viewerActual.getDefaultView();
+
+                // Habilitar el zoom
+                habilitarZoom(viewerActual);
+
+                Component viewComponent = (Component) view;  // Convertir a componente Swing
+
+                if (scrollPane != null) {
+                    remove(scrollPane);  // Remover el anterior JScrollPane si existe
+                }
+
+                // Crear y configurar JScrollPane con el viewComponent
+                scrollPane = new JScrollPane(viewComponent);
+                scrollPane.setPreferredSize(new Dimension(800, 600));  // Ajustar tamaño
+
+                add(scrollPane, BorderLayout.CENTER);  // Añadir el JScrollPane al centro
+
+                // Refrescar la ventana para mostrar los cambios
+                revalidate();
+                repaint();
             }
         }
     }
+    
+    
+    
+    // Asignar posiciones estáticas en una línea recta para los nodos
+    private void asignarPosicionesLineales(Graph graphStream) {
+        double posX = 0.0; // Posición inicial en el eje X
+        double increment = 1.0; // Incremento de espacio entre nodos
 
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
-    @SuppressWarnings("unchecked")
+        for (Node node : graphStream) {
+            // Asigna coordenadas X incrementales y Y constante para formar una línea recta horizontal
+            node.setAttribute("xyz", posX, 0.0, 0.0);
+            posX += increment; // Incrementa la posición X para el siguiente nodo
+        }
+    }
+
+    // Habilitar el zoom in/out usando el scroll del mouse
+    private void habilitarZoom(Viewer viewer) {
+        // Acceder al componente subyacente de Swing y añadir el MouseWheelListener
+        View view = viewer.getDefaultView();
+        Component viewComponent = (Component) view;  // Cast de View a Component
+        Camera camera = viewer.getDefaultView().getCamera();
+
+        viewComponent.addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                double factor = e.getPreciseWheelRotation() > 0 ? 1.1 : 0.9; // Zoom in o zoom out
+                camera.setViewPercent(camera.getViewPercent() * factor);  // Ajustar el zoom de la cámara
+            }
+        });
+    }
+    
+  
+    // Método para inicializar la ventana desde fuera (ejemplo)
+    public static void inicializarVentanaConGrafos(ListaArray listaGrafos, Lista lineas) {
+        VisualizarGrafo visualizarGrafo = new VisualizarGrafo(listaGrafos, lineas); // Instancia la ventana con los grafos reales
+    }
+
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 

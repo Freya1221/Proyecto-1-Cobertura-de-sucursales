@@ -18,6 +18,10 @@ public class Estacion {
         this.nombre = nombre;
     }
 
+    public Estacion(String sucursal) {
+        this.sucursal = sucursal;
+    }
+    
     public String getSucursal() {
         return sucursal;
     }
