@@ -6,7 +6,7 @@ package proyecto.pkg1;
 
 /**
  *
- * @author andre
+ * @author RUKAYA
  */
 public class Nodo {
     String nombre;
