@@ -58,24 +58,26 @@ public class Grafo {
     }
 
     //procedimiento recursivo
-    public void recorrerProfundidad(int v, boolean[] visitados, int contador) {
+    public Lista recorrerProfundidad(int v, boolean[] visitados, int contador, Lista recorrido) {
 //se marca el vértice v como visitado
         visitados[v] = true;
 //el tratamiento del vértice consiste únicamente en imprimirlo en pantalla
-        System.out.println(v);
+        recorrido.insertar(this.estaciones[v].nombre);
+
 
         if (contador != t) {
 //se examinan los vértices adyacentes a v para continuar el recorrido
             for (int i = 0; i < this.max; i++) {
                 if ((v != i) && (!visitados[i]) && this.estaciones[i].paradas.buscar(this.estaciones[v].nombre) != null) {
-                    recorrerProfundidad(i, visitados, contador + 1);
+                    recorrido = recorrerProfundidad(i, visitados, contador + 1, recorrido);
                 }
             }
         }
+        return recorrido;
     }
 //procedimiento no recursivo
 
-    public void profundidad() {
+    public Lista profundidad(String estacion) {
         boolean visitados[] = new boolean[this.max];
 
         for (int i = 0; i < this.max; i++) //inicializar vector con campos false
@@ -83,11 +85,12 @@ public class Grafo {
             visitados[i] = false;
         }
         for (int i = 0; i < this.max; i++) { //Relanza el recorrido en cada
-            if (!visitados[i]) //vértice visitado
+            if (this.estaciones[i].nombre.equals(estacion)) //vértice visitado
             {
-                recorrerProfundidad(i, visitados, 0);
+                return recorrerProfundidad(i, visitados, 0, new Lista());
             }
         }
+        return null;
     }
     
     public boolean existeArista(int i, int v){
