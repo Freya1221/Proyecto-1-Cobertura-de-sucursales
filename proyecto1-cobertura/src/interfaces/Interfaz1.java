@@ -5,7 +5,6 @@
  *
  * @author Sebastián Arriaga
  */
-
 package interfaces;
 
 import java.io.BufferedReader;
@@ -24,6 +23,11 @@ import proyecto1.cobertura.ListaArray.ListaArray;
  * @author sebas
  */
 public class Interfaz1 extends javax.swing.JFrame {
+
+    private int aux = 0;
+    int t;
+    private ListaArray grafos;
+    private Lista nombresLineas;
 
     /**
      * Creates new form Interfaz1
@@ -50,13 +54,13 @@ public class Interfaz1 extends javax.swing.JFrame {
         btnEstablecerT = new javax.swing.JButton();
         TextFieldT = new javax.swing.JTextField();
         ConfirmarArchivos = new javax.swing.JLabel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        TextAreaNuevaLinea = new javax.swing.JTextArea();
         btnAgregarNuevaLinea = new javax.swing.JButton();
         jLabel5 = new javax.swing.JLabel();
         TextArchivoCargado = new javax.swing.JLabel();
         LabelT = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
+        btnAgregarNuevaLinea1 = new javax.swing.JButton();
+        btnMostrarGrafo = new javax.swing.JButton();
 
         jScrollPane1.setViewportView(jTextPane1);
 
@@ -95,12 +99,6 @@ public class Interfaz1 extends javax.swing.JFrame {
         getContentPane().add(TextFieldT, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 50, 50, -1));
         getContentPane().add(ConfirmarArchivos, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 200, 180, 30));
 
-        TextAreaNuevaLinea.setColumns(20);
-        TextAreaNuevaLinea.setRows(5);
-        jScrollPane2.setViewportView(TextAreaNuevaLinea);
-
-        getContentPane().add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 320, 280, 180));
-
         btnAgregarNuevaLinea.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnAgregarNuevaLinea.setText("Agregar Línea");
         btnAgregarNuevaLinea.addActionListener(new java.awt.event.ActionListener() {
@@ -108,7 +106,7 @@ public class Interfaz1 extends javax.swing.JFrame {
                 btnAgregarNuevaLineaActionPerformed(evt);
             }
         });
-        getContentPane().add(btnAgregarNuevaLinea, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 510, 280, -1));
+        getContentPane().add(btnAgregarNuevaLinea, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 320, 280, -1));
 
         jLabel5.setFont(new java.awt.Font("Franklin Gothic Medium", 1, 36)); // NOI18N
         jLabel5.setText("Cobertura de Sucursales");
@@ -124,6 +122,24 @@ public class Interfaz1 extends javax.swing.JFrame {
         jLabel8.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel8.setText("Agregar nueva línea:");
         getContentPane().add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 280, 190, 30));
+
+        btnAgregarNuevaLinea1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        btnAgregarNuevaLinea1.setText("Agregar Línea");
+        btnAgregarNuevaLinea1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAgregarNuevaLinea1ActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnAgregarNuevaLinea1, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 320, 280, -1));
+
+        btnMostrarGrafo.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        btnMostrarGrafo.setText("Mostrar Grafo");
+        btnMostrarGrafo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnMostrarGrafoActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnMostrarGrafo, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 320, 180, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -168,9 +184,10 @@ public class Interfaz1 extends javax.swing.JFrame {
 
     public void parsearJson(String contenidoJson) {
         // Limpiar el contenido para evitar errores de formato
+        aux++;
         contenidoJson = contenidoJson.replaceAll("\\s+", ""); // Eliminar espacios en blanco
         contenidoJson = contenidoJson.replaceAll("\\n", ""); // Eliminar saltos de línea
-        Lista nombresLineas = new Lista();
+        nombresLineas = new Lista(); // Inicializar la lista de nombres de líneas
 
         // Extraer el contenido de "Metro de Caracas"
         String[] lineas = contenidoJson.split("\\},\\{");
@@ -181,7 +198,7 @@ public class Interfaz1 extends javax.swing.JFrame {
         lineas[lineas.length - 1] = lineas[lineas.length - 1].replace("}]}", "");
 
         // Lista para almacenar los grafos de cada línea
-        ListaArray grafos = new ListaArray(lineas.length);
+        grafos = new ListaArray(30); // Inicializar la lista de grafos
 
         // Iterar sobre cada línea del metro
         for (String linea : lineas) {
@@ -266,7 +283,6 @@ public class Interfaz1 extends javax.swing.JFrame {
             // Agregar el grafo de la línea a la lista de grafos
             grafos.insertFinal(grafo);
         }
-        
         TextArchivoCargado.setText("Archivo cargado");
         establecerValorTSistema(nombreSistema);
         // Imprimir las matrices de adyacencia para cada línea
@@ -275,11 +291,11 @@ public class Interfaz1 extends javax.swing.JFrame {
             g.printMatriz();
             System.out.println("");
         }
-        VisualizarGrafo.inicializarVentanaConGrafos(grafos, nombresLineas);
+        
     }
 
 // Método que establece el valor de t según el sistema de transporte cargado
-    int t;
+    
 
     public void establecerValorTSistema(String nombreSistema) {
         t = switch (nombreSistema.toLowerCase()) {
@@ -316,8 +332,28 @@ public class Interfaz1 extends javax.swing.JFrame {
     }//GEN-LAST:event_TextFieldTActionPerformed
 
     private void btnAgregarNuevaLineaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarNuevaLineaActionPerformed
-        // TODO add your handling code here:
+        if (aux != 0) {
+            VentanaAgregarNuevaLinea ventanaAgregarNuevaLinea = new VentanaAgregarNuevaLinea(grafos, nombresLineas);
+            ventanaAgregarNuevaLinea.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "No se ha cargado ningún archivo", "Archivo inexistente", JOptionPane.ERROR_MESSAGE);
+        }
+
+
     }//GEN-LAST:event_btnAgregarNuevaLineaActionPerformed
+
+    private void btnAgregarNuevaLinea1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarNuevaLinea1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnAgregarNuevaLinea1ActionPerformed
+
+    private void btnMostrarGrafoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarGrafoActionPerformed
+        // TODO add your handling code here:
+        if (aux != 0) {
+            VisualizarGrafo.inicializarVentanaConGrafos(grafos, nombresLineas,t);
+        } else {
+            JOptionPane.showMessageDialog(this, "No se ha cargado ningún archivo", "Archivo inexistente", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnMostrarGrafoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -358,17 +394,17 @@ public class Interfaz1 extends javax.swing.JFrame {
     private javax.swing.JLabel ConfirmarArchivos;
     private javax.swing.JLabel LabelT;
     private javax.swing.JLabel TextArchivoCargado;
-    private javax.swing.JTextArea TextAreaNuevaLinea;
     private javax.swing.JTextField TextFieldT;
     private javax.swing.JButton btnAgregarNuevaLinea;
+    private javax.swing.JButton btnAgregarNuevaLinea1;
     private javax.swing.JButton btnCargarArchivo;
     private javax.swing.JButton btnEstablecerT;
+    private javax.swing.JButton btnMostrarGrafo;
     private javax.swing.JDialog jDialog1;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextPane jTextPane1;
     // End of variables declaration//GEN-END:variables
 

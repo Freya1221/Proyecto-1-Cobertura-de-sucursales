@@ -159,27 +159,12 @@ public class ListaArray {
     public boolean isEmpty() {
         return getHead() == null;
     }
-
-    public NodoArray insertInIndex(Object element, int index) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-
-    public NodoArray deleteInIndex(int index) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-    
+ 
     public void print() {
         Integer pointer = getHead();
         while (pointer != null) {
             System.out.println("["+getArray()[pointer].getElement()+"]");
             pointer = getArray()[pointer].getNext();
-        }
-    }
-    
-    public void printSecuencial(){
-        for (int i = 0; i < getArray().length; i++) {
-            System.out.println("["+getArray()[i].getElement()+"]");
         }
     }
     
