@@ -100,8 +100,9 @@ public class Grafo {
         return false;
     }
 
-    public void amplitud() {
+    public Lista amplitud(String estacion) {
         Cola cola = new Cola();
+        Lista recorrido = new Lista();
         boolean visitados[] = new boolean[this.max];
         int v; //vértice actual
 //Se inicializa el vector visitados [] a false
@@ -111,7 +112,7 @@ public class Grafo {
 //El recorrido en amplitud se inicia en cada vértice no visitado
         for (int i = 0; i < this.max; i++) {
 //se pone en la cola el vértide de partida y se marca como visitado
-            if (!visitados[i]) {
+            if (this.estaciones[i].nombre.equals(estacion)) {
                 cola.encolar(this.estaciones[i].nombre);
                 visitados[i] = true;
                 while (cola.cabeza != null) {
@@ -122,6 +123,7 @@ public class Grafo {
                             v = i;
                         }
                     }
+                    recorrido.insertar(this.estaciones[v].nombre);
                     System.out.println(v);
 //y encolo los nodos adyacentes a v.
                     for (int j = 0; j < this.max; j++) {
@@ -131,7 +133,9 @@ public class Grafo {
                         }
                     }
                 }
+                break;
             }
         }
+        return recorrido;
     }
 }
