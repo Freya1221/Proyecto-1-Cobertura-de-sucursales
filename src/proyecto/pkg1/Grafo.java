@@ -89,4 +89,46 @@ public class Grafo {
             }
         }
     }
+    
+    public boolean existeArista(int i, int v){
+        if(this.estaciones[i].paradas.buscar(this.estaciones[v].nombre) != null){
+            return true;
+        }
+        return false;
+    }
+
+    public void amplitud() {
+        Cola cola = new Cola();
+        boolean visitados[] = new boolean[this.max];
+        int v; //vértice actual
+//Se inicializa el vector visitados [] a false
+        for (int i = 0; i < this.max; i++) {
+            visitados[i] = false;
+        }
+//El recorrido en amplitud se inicia en cada vértice no visitado
+        for (int i = 0; i < this.max; i++) {
+//se pone en la cola el vértide de partida y se marca como visitado
+            if (!visitados[i]) {
+                cola.encolar(this.estaciones[i].nombre);
+                visitados[i] = true;
+                while (cola.cabeza != null) {
+                    String des = cola.desencolar().nombre; //desencolar y tratar el vértice
+                    v = -1;
+                    for (int j = 0; j < this.max; j++) {
+                        if(this.estaciones[i].nombre.equals(des)){
+                            v = i;
+                        }
+                    }
+                    System.out.println(v);
+//y encolo los nodos adyacentes a v.
+                    for (int j = 0; j < this.max; j++) {
+                        if ((v != j) && this.existeArista(v, j) && (!visitados[j]))  {
+                            cola.encolar(this.estaciones[j].nombre);
+                            visitados[j] = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
