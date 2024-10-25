@@ -35,9 +35,18 @@ public class Grafo {
     }
 
     public Nodo buscarEstacion(String nombre) {
-        for (int i = 0; i < max; i++) {
-            if (this.estaciones[i].nombre.equals(nombre)) {
-                return this.estaciones[i];
+        String name[] = nombre.split("/");
+        if (name.length > 1) {
+            for (int i = 0; i < max; i++) {
+                if (this.estaciones[i].nombre.contains(name[0])) {
+                    return this.estaciones[i];
+                }
+            }
+        } else {
+            for (int i = 0; i < max; i++) {
+                if (this.estaciones[i].nombre.equals(nombre)) {
+                    return this.estaciones[i];
+                }
             }
         }
         return null;
@@ -64,7 +73,6 @@ public class Grafo {
 //el tratamiento del vértice consiste únicamente en imprimirlo en pantalla
         recorrido.insertar(this.estaciones[v].nombre);
 
-
         if (contador != t) {
 //se examinan los vértices adyacentes a v para continuar el recorrido
             for (int i = 0; i < this.max; i++) {
@@ -84,17 +92,27 @@ public class Grafo {
         {
             visitados[i] = false;
         }
-        for (int i = 0; i < this.max; i++) { //Relanza el recorrido en cada
-            if (this.estaciones[i].nombre.equals(estacion)) //vértice visitado
-            {
-                return recorrerProfundidad(i, visitados, 0, new Lista());
+
+        String name[] = estacion.split("/");
+        if (name.length > 1) {
+            for (int i = 0; i < max; i++) {
+                if (this.estaciones[i].nombre.contains(name[0])) {
+                    return recorrerProfundidad(i, visitados, 0, new Lista());
+                }
+            }
+        } else {
+            for (int i = 0; i < this.max; i++) { //Relanza el recorrido en cada
+                if (this.estaciones[i].nombre.equals(estacion)) //vértice visitado
+                {
+                    return recorrerProfundidad(i, visitados, 0, new Lista());
+                }
             }
         }
         return null;
     }
-    
-    public boolean existeArista(int i, int v){
-        if(this.estaciones[i].paradas.buscar(this.estaciones[v].nombre) != null){
+
+    public boolean existeArista(int i, int v) {
+        if (this.estaciones[i].paradas.buscar(this.estaciones[v].nombre) != null) {
             return true;
         }
         return false;
@@ -110,29 +128,45 @@ public class Grafo {
             visitados[i] = false;
         }
 //El recorrido en amplitud se inicia en cada vértice no visitado
-        for (int i = 0; i < this.max; i++) {
-//se pone en la cola el vértide de partida y se marca como visitado
-            if (this.estaciones[i].nombre.equals(estacion)) {
-                cola.encolar(this.estaciones[i].nombre);
-                visitados[i] = true;
-                while (cola.cabeza != null) {
-                    String des = cola.desencolar().nombre; //desencolar y tratar el vértice
-                    v = -1;
-                    for (int j = 0; j < this.max; j++) {
-                        if(this.estaciones[i].nombre.equals(des)){
-                            v = i;
-                        }
-                    }
-                    recorrido.insertar(this.estaciones[v].nombre);
-                    System.out.println(v);
-//y encolo los nodos adyacentes a v.
-                    for (int j = 0; j < this.max; j++) {
-                        if ((v != j) && this.existeArista(v, j) && (!visitados[j]))  {
-                            cola.encolar(this.estaciones[j].nombre);
-                            visitados[j] = true;
-                        }
-                    }
+        int p = -1;
+        String name[] = estacion.split("/");
+        if (name.length > 1) {
+            for (int i = 0; i < max; i++) {
+                if (this.estaciones[i].nombre.contains(name[0])) {
+                    cola.encolar(this.estaciones[i].nombre);
+                    visitados[i] = true;
+                    p = i;
                 }
+            }
+        } else {
+            for (int i = 0; i < this.max; i++) { //Relanza el recorrido en cada
+                if (this.estaciones[i].nombre.equals(estacion)) //vértice visitado
+                {
+                    cola.encolar(this.estaciones[i].nombre);
+                    visitados[i] = true;
+                    p = i;
+
+                }
+            }
+        }
+
+        while (cola.cabeza != null) {
+            String des = cola.desencolar().nombre; //desencolar y tratar el vértice
+            v = -1;
+            for (int j = 0; j < this.max; j++) {
+                if (this.estaciones[p].nombre.equals(des)) {
+                    v = p;
+                }
+            }
+            recorrido.insertar(this.estaciones[v].nombre);
+            System.out.println(v);
+//y encolo los nodos adyacentes a v.
+            for (int j = 0; j < this.max; j++) {
+                if ((v != j) && this.existeArista(v, j) && (!visitados[j])) {
+                    cola.encolar(this.estaciones[j].nombre);
+                    visitados[j] = true;
+                }
+
                 break;
             }
         }
