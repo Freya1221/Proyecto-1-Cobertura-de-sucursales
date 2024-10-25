@@ -4,7 +4,7 @@
  * @author Sebastián Arriaga
  */
 
-package proyecto1.cobertura;
+package proyecto1.cobertura.util;
 
 public class Lista{
     
@@ -50,6 +50,22 @@ public class Lista{
         size++;
         return nodo;
     }
+    
+    public Nodo insertFinal2(Par estacion) {
+        Nodo nodo = new Nodo(estacion);
+        if (isEmpty()) {
+            setHead(nodo);
+        } else {
+            Nodo pointer = getHead();
+            while(pointer.getNext() != null) {
+                pointer = pointer.getNext();
+            }
+            pointer.setNext(nodo);
+        }
+        size++;
+        return nodo;
+    }
+    
     
     public Nodo deleteBegin(){
         if (isEmpty()) {

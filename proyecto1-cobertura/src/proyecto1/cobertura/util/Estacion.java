@@ -4,7 +4,7 @@
  * @author Sebastián Arriaga
  */
 
-package proyecto1.cobertura;
+package proyecto1.cobertura.util;
 
 
 public class Estacion {

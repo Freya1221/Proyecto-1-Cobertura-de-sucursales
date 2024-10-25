@@ -4,7 +4,7 @@
  * @author Sebastián Arriaga
  */
 
-package proyecto1.cobertura.ListaArray;
+package proyecto1.cobertura.util;
 
 public class NodoArray {
     private Object element;

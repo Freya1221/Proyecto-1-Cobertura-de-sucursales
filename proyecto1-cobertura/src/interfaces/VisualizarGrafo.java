@@ -11,14 +11,16 @@ import org.graphstream.graph.Node;
 import org.graphstream.ui.swing_viewer.ViewPanel;
 import org.graphstream.ui.view.View;
 import proyecto1.cobertura.Grafo;
-import proyecto1.cobertura.Lista;
-import proyecto1.cobertura.ListaArray.ListaArray;
-import proyecto1.cobertura.Nodo;
+import proyecto1.cobertura.util.Lista;
+import proyecto1.cobertura.util.ListaArray;
+import proyecto1.cobertura.util.Nodo;
 import org.graphstream.ui.view.Viewer;
 import org.graphstream.ui.view.camera.Camera;
-
-
-import java.util.*;  // Para BFS
+import org.graphstream.graph.Edge;
+import proyecto1.cobertura.util.Estacion;
+import proyecto1.cobertura.util.Map;
+import proyecto1.cobertura.util.Queue;
+import proyecto1.cobertura.util.Set;
 
 /**
  * En esta clase se abre una ventana para poder visualizar el grafo, establecer
@@ -51,7 +53,6 @@ public class VisualizarGrafo extends JFrame {
         setTitle("Visualizador de Grafos");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        
 
         JPanel panelSeleccion = new JPanel();
         selectorGrafos = new JComboBox<>();
@@ -145,7 +146,7 @@ public class VisualizarGrafo extends JFrame {
         }
     }
 
-    // Método para mostrar el radio de cobertura de la estación seleccionada
+    // Método para mostrar el radio de cobertura basado en `t`
     private void mostrarRadioCobertura() {
         if (graphStream == null) {
             System.err.println("Error: No se ha cargado ningún grafo.");
@@ -157,89 +158,115 @@ public class VisualizarGrafo extends JFrame {
             Node estacion = graphStream.getNode(estacionSeleccionada);
             if (estacion != null) {
                 System.out.println("Estación seleccionada: " + estacion.getId());
-                
-                Set<Node> estacionesEnRadio = calcularEstacionesEnRadio(estacion, t);
-                mostrarRadio(estacion, estacionesEnRadio);  // Mostrar el radio basado en las estaciones dentro del rango
+                // Aquí llamamos al método para calcular y mostrar el radio de cobertura
+                mostrarRadio(estacion, t);  // `t` es el número de estaciones de cobertura
             }
         }
     }
-    
-//    private Set<Node> calcularEstacionesEnRadio(Node estacionInicial, int t) {
-//        Set<Node> visitados = new HashSet<>();
-//        Queue<Node> cola = new LinkedList<>();
-//        Map<Node, Integer> distancia = new HashMap<>();
-//
-//        cola.add(estacionInicial);
-//        distancia.put(estacionInicial, 0);
-//
-//        while (!cola.isEmpty()) {
-//            Node estacionActual = cola.poll();
-//            int dist = distancia.get(estacionActual);
-//
-//            // Si la distancia actual es mayor que t, no continuar
-//            if (dist >= t) {
-//                continue;
-//            }
-//
-//            // Obtener vecinos
-//            for (Node vecino : estacionActual.getEachNeighbor()) {
-//                if (!visitados.contains(vecino)) {
-//                    distancia.put(vecino, dist + 1);
-//                    cola.add(vecino);
-//                    visitados.add(vecino);
-//                }
-//            }
-//        }
-//
-//        return visitados;
-//    }
-    
-    
 
-    // Método para mostrar un círculo alrededor de la estación seleccionada
-    private void mostrarRadio(Node estacion, double radio) {
-        // Restaurar estilo anterior del nodo antes de aplicar cambios
-        estacion.setAttribute("ui.style", "fill-color: black; size: 15px; text-alignment: under; text-size: 12px;");
+    private Set calcularEstacionesEnRadio(Node estacionInicial, int t) {
+        Set visitados = new Set();
+        Queue cola = new Queue();
+        Map distancia = new Map();
 
-        // Verificar si ya existe un nodo de radio anterior y eliminarlo
-        String radioId = estacion.getId() + "_radio";
-        if (graphStream.getNode(radioId) != null) {
-            graphStream.removeNode(radioId);
+        // Recuperar la Estacion desde el Node usando el atributo
+        Estacion estacionInicialReal = estacionInicial.getAttribute("estacion", Estacion.class);
+
+        if (estacionInicialReal == null) {
+            System.err.println("Error: El nodo no tiene una estación asociada.");
+            return visitados; // Devolver un conjunto vacío en caso de error
         }
 
-        // Crear un nodo adicional para representar el círculo del radio
-        Node nodoRadio = graphStream.addNode(radioId);
+        // Añadir la estación inicial a la cola y marcarla como visitada
+        cola.enqueue(estacionInicial);
+        distancia.put(estacionInicialReal, 0);
+        visitados.add(estacionInicialReal);
 
-        // Posicionar el nodo del círculo en la misma ubicación que la estación
-        Object[] posicionObj = (Object[]) estacion.getAttribute("xyz");
-        double[] posicion = new double[posicionObj.length];
+        while (!cola.isEmpty()) {
+            Node estacionActual = (Node) cola.dequeue().getElement();
+            Estacion estacionActualReal = estacionActual.getAttribute("estacion", Estacion.class);
 
-// Convertimos el Object[] a double[]
-        for (int i = 0; i < posicionObj.length; i++) {
-            posicion[i] = (double) posicionObj[i];
+            // Verificar si estacionActualReal es null
+            if (estacionActualReal == null) {
+                System.err.println("Error: El nodo actual no tiene una estación asociada.");
+                continue;  // Omitir este nodo
+            }
+
+            Integer dist = distancia.get(estacionActualReal);
+
+            // Si la distancia actual es mayor que t, no continuar
+            if (dist >= t) {
+                continue;
+            }
+
+            // Iterar sobre las aristas conectadas al nodo actual
+            for (Edge arista : (Iterable<Edge>) estacionActual.edges()::iterator) {
+                Node vecino = arista.getOpposite(estacionActual);
+                Estacion vecinoEstacion = vecino.getAttribute("estacion", Estacion.class);
+
+                if (vecinoEstacion != null && !visitados.contains(vecinoEstacion)) {
+                    distancia.put(vecinoEstacion, dist + 1);
+                    cola.enqueue(vecino);
+                    visitados.add(vecinoEstacion);
+                }
+            }
         }
 
-// Ahora puedes usar `posicion` como coordenadas xyz
-        nodoRadio.setAttribute("xyz", posicion[0], posicion[1], posicion[2]);
-
-        // Establecer el estilo para el círculo de radio con opacidad
-        nodoRadio.setAttribute("ui.style", String.format(
-                "size: %fgu; fill-color: rgba(0, 0, 255, 0.2); stroke-mode: plain; stroke-color: blue; stroke-width: 2px;",
-                radio // Ajustar el tamaño del círculo según el valor `t`
-        ));
-
-        // Añadir un mensaje de depuración para verificar si el nodo se crea
-        System.out.println("Nodo de radio creado: " + nodoRadio.getId() + " con tamaño: " + radio);
+        return visitados;
     }
-    // Asignar posiciones estáticas en una línea recta para los nodos
 
-    private void asignarPosicionesLineales(Graph graphStream) {
-        double posX = 0.0;
-        double increment = 1.0;
+    // Método para calcular y mostrar el radio
+    private void mostrarRadio(Node estacion, int t) {
+        Set nodosEnRadio = calcularEstacionesEnRadio(estacion, t);
+        Queue queue = new Queue();
+        Map distancia = new Map();
 
-        for (Node node : graphStream) {
-            node.setAttribute("xyz", posX, 0.0, 0.0); // Asignar coordenadas X e Y
-            posX += increment;
+        // Empezamos con la estación inicial
+        nodosEnRadio.add((Estacion) estacion);
+        queue.enqueue(estacion);
+        distancia.put((Estacion) estacion, 0);  // La distancia inicial de la estación es 0
+
+        // Nivel de BFS (Distancia)
+        int nivel = 0;
+
+        // Iteramos usando BFS hasta que el nivel sea mayor o igual a `t`
+        while (!queue.isEmpty() && nivel < t) {
+            int tamanoNivel = queue.getSize();  // Procesamos todos los nodos del nivel actual
+            for (int i = 0; i < tamanoNivel; i++) {
+                Node actual = (Node) queue.dequeue().getElement();  // Sacamos el nodo actual de la cola
+                int dist = distancia.get((Estacion) actual);  // Obtenemos la distancia del nodo actual
+
+                // Iteramos sobre las aristas (edges) del nodo actual
+                actual.edges().forEach(arista -> {
+                    // Obtenemos el nodo vecino a través de la arista
+                    Node vecino = arista.getOpposite(actual);
+
+                    // Si el vecino no ha sido visitado
+                    if (!nodosEnRadio.contains((Estacion) vecino)) {
+                        distancia.put((Estacion) vecino, dist + 1);  // Actualizamos la distancia del vecino
+                        queue.enqueue(vecino);  // Añadimos el vecino a la cola para procesar
+                        nodosEnRadio.add((Estacion) vecino);  // Añadimos el vecino a los nodos en el radio
+                    }
+                });
+            }
+            nivel++;  // Aumentamos el nivel de BFS
+        }
+
+        // Finalmente, mostramos el círculo de cobertura con los nodos encontrados
+        mostrarCirculoDeCobertura(nodosEnRadio);
+    }
+
+    // Método para mostrar visualmente los nodos que están dentro del radio
+    private void mostrarCirculoDeCobertura(Set nodosEnRadio) {
+        // Restauramos el estilo de todos los nodos del grafo
+        for (org.graphstream.graph.Node nodo : graphStream) {
+            nodo.removeAttribute("ui.style");  // Restaurar el estilo a su estado original
+        }
+
+        // Establecemos el estilo para los nodos dentro del radio de cobertura
+        for (int i = 0; i < nodosEnRadio.size(); i++) {
+            org.graphstream.graph.Node nodoEnRadio = (org.graphstream.graph.Node) nodosEnRadio.obtener(i).getEstacion();
+            nodoEnRadio.setAttribute("ui.style", "fill-color: rgba(0, 0, 255, 0.5); size: 20px;");
         }
     }
 
@@ -257,6 +284,17 @@ public class VisualizarGrafo extends JFrame {
             scrollPane.getViewport().revalidate();
             scrollPane.getViewport().repaint();
         });
+    }
+
+    // Asignar posiciones estáticas en una línea recta para los nodos
+    private void asignarPosicionesLineales(Graph graphStream) {
+        double posX = 0.0;
+        double increment = 1.0;
+
+        for (Node node : graphStream) {
+            node.setAttribute("xyz", posX, 0.0, 0.0); // Asignar coordenadas X e Y
+            posX += increment;
+        }
     }
 
     public static void inicializarVentanaConGrafos(ListaArray listaGrafos, Lista lineas, int t) {

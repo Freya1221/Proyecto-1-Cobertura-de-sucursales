@@ -1,12 +1,14 @@
 /**
  * En esta clase grafo se diseña un grafo de tipo matriz adyacente, junto con todos sus métodos
- * 
+ *
  * @author Sebastián Arriaga
  */
-
 package proyecto1.cobertura;
 
+import proyecto1.cobertura.util.Estacion;
+import proyecto1.cobertura.util.Lista;
 import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 
 public class Grafo {
@@ -42,8 +44,6 @@ public class Grafo {
     public void setNumVertices(int numVertices) {
         this.numVertices = numVertices;
     }
-    
-    
 
     public void addEstacion(String sucursal, String nombre) {
         Estacion estacion = new Estacion(sucursal, nombre);
@@ -85,7 +85,7 @@ public class Grafo {
         matrizAdyacencia = new int[numVertices][numVertices];
         for (int i = 0; i < numVertices; i++) {
             for (int j = 0; j < numVertices; j++) {
-                matrizAdyacencia[i][j] = 0; 
+                matrizAdyacencia[i][j] = 0;
             }
         }
     }
@@ -98,11 +98,11 @@ public class Grafo {
             System.out.println();
         }
     }
-    
+
     // Método para visualizar el grafo con GraphStream
     public void visualizarGrafo() {
         Graph graph = new SingleGraph("Grafo del sistema de transporte");
-        
+
         // Agregar nodos (estaciones) al grafo
         for (int i = 0; i < estaciones.getSize(); i++) {
             Estacion estacion = estaciones.obtener(i);
@@ -127,14 +127,16 @@ public class Grafo {
         // Visualizar el grafo
         graph.display();
     }
-    
+
     public Graph toGraphStream() {
         Graph graph = new SingleGraph("Grafo del sistema de transporte");
 
         // Agregar nodos (estaciones) al grafo de GraphStream
         for (int i = 0; i < estaciones.getSize(); i++) {
             Estacion estacion = estaciones.obtener(i);
-            graph.addNode(estacion.getNombre()).setAttribute("ui.label", estacion.getNombre());
+            Node node = graph.addNode(estacion.getNombre());
+            node.setAttribute("ui.label", estacion.getNombre());
+            node.setAttribute("estacion", estacion);  // Asignar la estación como atributo al nodo
         }
 
         // Agregar aristas (conexiones) según la matriz de adyacencia
@@ -150,7 +152,7 @@ public class Grafo {
                 }
             }
         }
-        
+
         return graph;  // Retorna el grafo compatible con GraphStream
     }
 

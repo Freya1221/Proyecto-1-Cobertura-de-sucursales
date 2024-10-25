@@ -6,10 +6,10 @@ package interfaces;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import proyecto1.cobertura.Estacion;
+import proyecto1.cobertura.util.Estacion;
 import proyecto1.cobertura.Grafo;
-import proyecto1.cobertura.Lista;
-import proyecto1.cobertura.ListaArray.ListaArray;
+import proyecto1.cobertura.util.Lista;
+import proyecto1.cobertura.util.ListaArray;
 
 /**
  *
