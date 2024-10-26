@@ -6,7 +6,7 @@ package proyecto.pkg1;
 
 /**
  *
- * @author andre
+ * @author RUKAYA
  */
 public class Proyecto1 {
 
@@ -15,6 +15,7 @@ public class Proyecto1 {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        Cargar vi = new Cargar(new Grafo());
     }
     
 }
