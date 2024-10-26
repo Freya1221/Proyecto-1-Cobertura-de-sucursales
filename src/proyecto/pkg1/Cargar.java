@@ -28,7 +28,7 @@ public class Cargar extends javax.swing.JFrame {
     public Cargar(Grafo grafo) {
         this.grafo = grafo;
         initComponents();
-                this.setVisible(true);
+        this.setVisible(true);
 
     }
 
@@ -79,56 +79,57 @@ public class Cargar extends javax.swing.JFrame {
         Grafo grafo = new Grafo();
         if (jsonElement.isJsonObject()) {
             JsonObject jsonObject = jsonElement.getAsJsonObject();
-            JsonArray lineas = jsonObject.getAsJsonArray("Metro de Caracas");
+            for (String key : jsonObject.keySet()) {
+                JsonArray lineas = jsonObject.getAsJsonArray(key);
 
-            for (JsonElement lineaElement : lineas) {
-                JsonObject linea = lineaElement.getAsJsonObject();
-                for (String nombreLinea : linea.keySet()) {
-                    JsonArray estaciones = linea.getAsJsonArray(nombreLinea);
-                    String[] e = new String[estaciones.size()];
-                    int i = 0;
-                    for (JsonElement estacionElement : estaciones) {
-                        if (estacionElement.isJsonObject()) {
-                            // Si es un objeto, imprimimos ambos nombres
-                            JsonObject estacionObj = estacionElement.getAsJsonObject(); // Convertimos el elemento a objeto
-                            for (String estacionNombre : estacionObj.keySet()) {
-                                // Imprimimos el nombre de ambas estaciones
-                                e[i] = estacionNombre + "/" + estacionObj.get(estacionNombre).getAsString();
-                            }
-                        } else {
-                            String nombreEstacion = estacionElement.getAsString();
-                            e[i] = nombreEstacion;
-                        }
-                        i++;
-                    }
-                    for (String nombre : e) {
-                        if (!nombre.contains("/")) {
-                            Nodo v = grafo.buscarEstacion(nombre);
-                            if (v == null) {
-                                grafo.agregarEstacion(nombre);
-                            }
-                        } else {
-                            String[] n = nombre.split("/");
-                            boolean found = false;
-                            for (int j = 0; j < grafo.max; j++) {
-                                if (grafo.estaciones[j].nombre.trim().contains("/")) {
+                for (JsonElement lineaElement : lineas) {
+                    JsonObject linea = lineaElement.getAsJsonObject();
+                    for (String nombreLinea : linea.keySet()) {
+                        JsonArray estaciones = linea.getAsJsonArray(nombreLinea);
+                        String[] e = new String[estaciones.size()];
+                        int i = 0;
+                        for (JsonElement estacionElement : estaciones) {
+                            if (estacionElement.isJsonObject()) {
+                                // Si es un objeto, imprimimos ambos nombres
+                                JsonObject estacionObj = estacionElement.getAsJsonObject(); // Convertimos el elemento a objeto
+                                for (String estacionNombre : estacionObj.keySet()) {
+                                    // Imprimimos el nombre de ambas estaciones
+                                    e[i] = estacionNombre + "/" + estacionObj.get(estacionNombre).getAsString();
                                 }
-                                if (grafo.estaciones[j].nombre.trim().contains(n[0].trim()) && grafo.estaciones[j].nombre.trim().contains(n[1].trim())) {
-                                    found = true;
-                                    break;
+                            } else {
+                                String nombreEstacion = estacionElement.getAsString();
+                                e[i] = nombreEstacion;
+                            }
+                            i++;
+                        }
+                        for (String nombre : e) {
+                            if (!nombre.contains("/")) {
+                                Nodo v = grafo.buscarEstacion(nombre);
+                                if (v == null) {
+                                    grafo.agregarEstacion(nombre);
+                                }
+                            } else {
+                                String[] n = nombre.split("/");
+                                boolean found = false;
+                                for (int j = 0; j < grafo.max; j++) {
+                                    if (grafo.estaciones[j].nombre.trim().contains("/")) {
+                                    }
+                                    if (grafo.estaciones[j].nombre.trim().contains(n[0].trim()) && grafo.estaciones[j].nombre.trim().contains(n[1].trim())) {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (!found) {
+                                    grafo.agregarEstacion(nombre);
                                 }
                             }
-                            if (!found) {
-                                grafo.agregarEstacion(nombre);
-                            }
+                        }
+                        int j = 0;
+                        for (int k = 1; k < e.length; k++) {
+                            grafo.agregarRelacion(e[j], e[k]);
+                            j++;
                         }
                     }
-                    int j = 0;
-                    for (int k = 1; k < e.length; k++) {
-                        grafo.agregarRelacion(e[j], e[k]);
-                        j++;
-                    }
-
                 }
             }
         } else {
