@@ -21,6 +21,7 @@ public class Grafo {
         estaciones = new Lista();
     }
 
+//Getters y Setters
     public Lista getEstaciones() {
         return estaciones;
     }
@@ -45,6 +46,7 @@ public class Grafo {
         this.numVertices = numVertices;
     }
 
+//    Agrega una estación al grafo
     public void addEstacion(String sucursal, String nombre) {
         Estacion estacion = new Estacion(sucursal, nombre);
         if (!containsEstacion(estacion)) {
@@ -52,6 +54,7 @@ public class Grafo {
         }
     }
 
+//    Verifica si existe esa estación en el grafo
     private boolean containsEstacion(Estacion estacion) {
         for (int i = 0; i < estaciones.getSize(); i++) {
             if (estaciones.obtener(i).getNombre().equalsIgnoreCase(estacion.getNombre())) {
@@ -61,7 +64,8 @@ public class Grafo {
         return false;
     }
 
-    private int findEstacionIndex(String nombre) {
+//    Encuentra el índice de la estación en el grafo
+    public int findEstacionIndex(String nombre) {
         for (int i = 0; i < estaciones.getSize(); i++) {
             if (estaciones.obtener(i).getNombre().equals(nombre)) {
                 return i;
@@ -70,6 +74,7 @@ public class Grafo {
         return -1;
     }
 
+//    Agrega las conexiones de las estaciones/paradas
     public void agregarConexion(String nombre1, String nombre2) {
         int index1 = findEstacionIndex(nombre1);
         int index2 = findEstacionIndex(nombre2);
@@ -80,6 +85,7 @@ public class Grafo {
         }
     }
 
+//    Inicializa la matriz, al principio sin conexiones
     public void inicializarMatriz(int numVertices) {
         this.numVertices = numVertices;
         matrizAdyacencia = new int[numVertices][numVertices];
@@ -90,6 +96,7 @@ public class Grafo {
         }
     }
 
+//    Imprime la matriz
     public void printMatriz() {
         for (int[] row : matrizAdyacencia) {
             for (int cell : row) {
@@ -128,6 +135,7 @@ public class Grafo {
         graph.display();
     }
 
+//    Metodo para llevar el grafo a GraphStream retornando un valor
     public Graph toGraphStream() {
         Graph graph = new SingleGraph("Grafo del sistema de transporte");
 
@@ -153,7 +161,7 @@ public class Grafo {
             }
         }
 
-        return graph;  // Retorna el grafo compatible con GraphStream
+        return graph;  
     }
 
 }

@@ -19,7 +19,9 @@ import proyecto1.cobertura.util.Lista;
 import proyecto1.cobertura.util.ListaArray;
 
 /**
- *
+ * Se toma un aux para verificar si ya se eligió un json, variable t
+ * lista array para los grafos y la lista de las líneas
+ * 
  * @author sebas
  */
 public class Interfaz1 extends javax.swing.JFrame {
@@ -189,7 +191,7 @@ public class Interfaz1 extends javax.swing.JFrame {
         contenidoJson = contenidoJson.replaceAll("\\n", ""); // Eliminar saltos de línea
         nombresLineas = new Lista(); // Inicializar la lista de nombres de líneas
 
-        // Extraer el contenido de "Metro de Caracas"
+        // Extraer el contenido del nombre
         String[] lineas = contenidoJson.split("\\},\\{");
         String nombreSistema = contenidoJson.substring(contenidoJson.indexOf("{\"") + 2, contenidoJson.indexOf("\":[{"));
 
@@ -237,17 +239,16 @@ public class Interfaz1 extends javax.swing.JFrame {
             // Inicializar la matriz de adyacencia para la línea actual
             grafo.inicializarMatriz(grafo.getEstaciones().getSize());
 
-            // Establecer conexiones entre estaciones consecutivas
+            // Establecer las conexiones de forma consecutiva
             for (int j = 0; j < estaciones.length - 1; j++) {
                 String estacion1 = estaciones[j].replaceAll("[\"{}]", "");
                 String estacion2 = estaciones[j + 1].replaceAll("[\"{}]", "");
 
                 if (!estacion1.contains(":") && !estacion2.contains(":")) {
-                    // Conectar estaciones solo si no tienen conexiones especiales
                     grafo.agregarConexion(estacion1, estacion2);
                 } else {
                     if (estacion1.contains(":") && estacion2.contains(":")) {
-                        // Ambos tienen dos estaciones conectadas
+                        // Ambos tienen dos estaciones conectadas 
                         String[] partes1 = estacion1.split(":");
                         String estacionLinea1A = partes1[0];  // Estación que pertenece a esta línea
                         String estacionLinea2A = partes1[1];  // Estación de la otra línea
@@ -285,7 +286,7 @@ public class Interfaz1 extends javax.swing.JFrame {
         }
         TextArchivoCargado.setText("Archivo cargado");
         establecerValorTSistema(nombreSistema);
-        // Imprimir las matrices de adyacencia para cada línea
+        // Imprimir las matrices para comprobar si lo hacen correctamente
         for (int i = 0; i < grafos.getSize(); i++) {
             Grafo g = (Grafo) grafos.getArray()[i].getElement();
             g.printMatriz();
@@ -295,8 +296,6 @@ public class Interfaz1 extends javax.swing.JFrame {
     }
 
 // Método que establece el valor de t según el sistema de transporte cargado
-    
-
     public void establecerValorTSistema(String nombreSistema) {
         t = switch (nombreSistema.toLowerCase()) {
             case "metrodecaracas" ->
@@ -307,7 +306,7 @@ public class Interfaz1 extends javax.swing.JFrame {
                 0;
         }; // Valor por defecto si no se reconoce el sistema
 
-        // Mostrar el valor de 't' en el textField
+        // Mostrar el valor de t en el textField
         TextFieldT.setText(String.valueOf(t));
 
         // Hacer visibles los componentes después de cargar el sistema
@@ -320,7 +319,7 @@ public class Interfaz1 extends javax.swing.JFrame {
     private void btnEstablecerTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEstablecerTActionPerformed
         try {
             int nuevoT = Integer.parseInt(TextFieldT.getText());
-            t = nuevoT;  // Actualizar el valor de t
+            t = nuevoT;  // Actualizar el valor de t si el usuario lo requiere
             System.out.println("Valor de t actualizado a: " + t);
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Por favor ingresa un número entero válido.");
@@ -331,6 +330,7 @@ public class Interfaz1 extends javax.swing.JFrame {
 
     }//GEN-LAST:event_TextFieldTActionPerformed
 
+//    Botón que llama a la función para agregar una nueva línea
     private void btnAgregarNuevaLineaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarNuevaLineaActionPerformed
         if (aux != 0) {
             VentanaAgregarNuevaLinea ventanaAgregarNuevaLinea = new VentanaAgregarNuevaLinea(grafos, nombresLineas);
@@ -346,6 +346,7 @@ public class Interfaz1 extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_btnAgregarNuevaLinea1ActionPerformed
 
+//    Botón para visualizar el grafo
     private void btnMostrarGrafoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarGrafoActionPerformed
         // TODO add your handling code here:
         if (aux != 0) {

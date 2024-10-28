@@ -5,7 +5,8 @@
 package proyecto1.cobertura.util;
 
 /**
- *
+ * Constructor toma un dato de tipo estación junto con un integer
+ * 
  * @author sebas
  */
 

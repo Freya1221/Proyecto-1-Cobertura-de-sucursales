@@ -1,6 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
+/**
+ * En esta clase se abre una ventana para poder visualizar el grafo, establecer
+ * sucursales y observar el radio.
+ *
+ * @author Sebastián Arriaga
  */
 package interfaces;
 
@@ -8,7 +10,6 @@ import javax.swing.*;
 import java.awt.*;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
-import org.graphstream.ui.swing_viewer.ViewPanel;
 import org.graphstream.ui.view.View;
 import proyecto1.cobertura.Grafo;
 import proyecto1.cobertura.util.Lista;
@@ -16,15 +17,16 @@ import proyecto1.cobertura.util.ListaArray;
 import proyecto1.cobertura.util.Nodo;
 import org.graphstream.ui.view.Viewer;
 import org.graphstream.ui.view.camera.Camera;
-import org.graphstream.graph.Edge;
 import proyecto1.cobertura.util.Estacion;
 import proyecto1.cobertura.util.Map;
+import proyecto1.cobertura.util.NodoArray;
 import proyecto1.cobertura.util.Queue;
 import proyecto1.cobertura.util.Set;
+import proyecto1.cobertura.util.Stack;
 
 /**
- * En esta clase se abre una ventana para poder visualizar el grafo, establecer
- * sucursales y observar el radio.
+ * Se declaran los elementos poder trabajar la visualización del grafo, toma
+ * como parámetros la Lista de grafos, el nombre de las línea y t
  *
  * @author Sebastián Arriaga
  */
@@ -33,16 +35,17 @@ public class VisualizarGrafo extends JFrame {
     private Viewer viewerActual;
     private ListaArray listaGrafos;
     private JComboBox<String> selectorGrafos;
-    private JComboBox<String> selectorEstaciones; // Nueva barra de selección de estaciones
-    private JButton botonEstacionAceptar; // Botón de Aceptar para la estación
+    private JComboBox<String> selectorEstaciones;
+    private JButton btnBFS;
+    private JButton btnDFS;
     private Lista lineas;
     private int t;
     private JScrollPane scrollPane;
-    private Graph graphStream;  // El grafo que se mostrará
-
-    private ViewPanel graphPanel;  // El panel que contiene el grafo de GraphStream
-
-    private JFrame frame;
+    private Graph graphStream;
+    String lineaSeleccionada = new String();
+    private Set estacionesSeleccionadas;
+    private JComboBox<String> selectorEstacionesSeleccionadas;
+    private JButton btnDeseleccionar;
 
     public VisualizarGrafo(ListaArray listaGrafos, Lista lineas, int t) {
 
@@ -50,24 +53,45 @@ public class VisualizarGrafo extends JFrame {
         this.lineas = lineas;
         this.t = t;
 
+//        Se establecen sus características
         setTitle("Visualizador de Grafos");
-        setSize(800, 600);
+        setSize(900, 200);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
+//        Aquí se inicia el panel de selección
         JPanel panelSeleccion = new JPanel();
         selectorGrafos = new JComboBox<>();
-        selectorEstaciones = new JComboBox<>(); // Inicialización del selector de estaciones
+        selectorEstaciones = new JComboBox<>();
         JButton botonMostrar = new JButton("Mostrar Grafo");
-        botonEstacionAceptar = new JButton("Aceptar Estación"); // Botón para aceptar la estación
 
+        // Botón para búsqueda en anchura (BFS)
+        btnBFS = new JButton("Buscar por BFS");
+
+        // Botón para búsqueda en profundidad (DFS)
+        btnDFS = new JButton("Buscar por DFS");
+
+        // Aquí se combinan todos para dar paso a la construcción de la ventana
         llenarSelectorConLineas();
         panelSeleccion.add(selectorGrafos);
         panelSeleccion.add(botonMostrar);
-        panelSeleccion.add(selectorEstaciones); // Añadimos el selector de estaciones
-        panelSeleccion.add(botonEstacionAceptar); // Añadimos el botón de aceptar estación
+        panelSeleccion.add(selectorEstaciones);
+        panelSeleccion.add(btnDFS);
+        panelSeleccion.add(btnBFS);
 
-        botonMostrar.addActionListener(e -> mostrarGrafoSeleccionado());
-        botonEstacionAceptar.addActionListener(e -> mostrarRadioCobertura()); // Acción al aceptar estación
+        botonMostrar.addActionListener(e -> mostrarGrafoSeleccionado(lineaSeleccionada));
+        btnDFS.addActionListener(e -> mostrarRadioCobertura(true));
+        btnBFS.addActionListener(e -> mostrarRadioCobertura(false));
+
+        estacionesSeleccionadas = new Set();
+        selectorEstacionesSeleccionadas = new JComboBox<>();
+        btnDeseleccionar = new JButton("Deseleccionar");
+
+        // Agregar los componentes al panel de selección
+        panelSeleccion.add(selectorEstacionesSeleccionadas);
+        panelSeleccion.add(btnDeseleccionar);
+
+        // Añadir el evento de deselección
+        btnDeseleccionar.addActionListener(e -> deseleccionarEstacion());
 
         setLayout(new BorderLayout());
         add(panelSeleccion, BorderLayout.NORTH); // Panel de selección en la parte superior
@@ -83,9 +107,35 @@ public class VisualizarGrafo extends JFrame {
         }
     }
 
+    // Método para configurar y aplicar estilos al grafo
+    private void configurarEstilos(Grafo grafo) {
+        String css = """
+    node {
+        fill-color: black;
+        size: 15px;
+        text-size: 14px;
+        text-color: black;
+        text-background-mode: rounded-box;
+        text-background-color: #FFFFFFAA;
+        text-alignment: center;
+    }
+    node.enRadio {
+        fill-color: rgba(0, 0, 255, 0.7);
+        size: 25px;
+        stroke-mode: plain;
+        stroke-color: blue;
+        stroke-width: 3px;
+        text-color: blue;
+    }
+    """;
+
+        // Aplicar la hoja de estilo CSS al grafo
+        grafo.toGraphStream().setAttribute("ui.stylesheet", css);
+    }
+
     // Método para mostrar el grafo seleccionado y aplicar zoom y desplazamiento
-    private void mostrarGrafoSeleccionado() {
-        String lineaSeleccionada = (String) selectorGrafos.getSelectedItem();
+    private void mostrarGrafoSeleccionado(String lineaSeleccionada) {
+        lineaSeleccionada = (String) selectorGrafos.getSelectedItem();
 
         if (lineaSeleccionada != null) {
             Grafo grafoSeleccionado = null;
@@ -100,36 +150,29 @@ public class VisualizarGrafo extends JFrame {
 
             if (grafoSeleccionado != null) {
                 // Asignar el graphStream
-                graphStream = grafoSeleccionado.toGraphStream();  // << IMPORTANTE
+                graphStream = grafoSeleccionado.toGraphStream();
                 System.setProperty("org.graphstream.ui", "swing");
 
-                // Cambiar estilo de nodos y etiquetas
+                // Cambiar estilo de los nodos
                 graphStream.setAttribute("ui.stylesheet",
-                        "node { fill-color: black; size: 15px; text-alignment: under; text-size: 12px; text-color: black; }"
+                        "node { fill-color: black; size: 15px; text-alignment: under; text-size: 9px; text-color: black; }"
                         + "edge { fill-color: black; }");
 
                 if (viewerActual != null) {
                     viewerActual.close();
                 }
-
-                viewerActual = graphStream.display(false); // Mostrar el grafo 
+                // Mostrar el grafo
+                viewerActual = graphStream.display(false);
                 viewerActual.disableAutoLayout();
                 asignarPosicionesLineales(graphStream);
+                configurarEstilos(grafoSeleccionado);
 
-                View view = viewerActual.getDefaultView();
-                habilitarZoom(viewerActual); // Habilitar zoom
-
-                Component viewComponent = (Component) view;
+                habilitarZoom(viewerActual);
 
                 if (scrollPane != null) {
                     remove(scrollPane);
                 }
 
-                // Crear JScrollPane para permitir desplazamiento con barras
-                scrollPane = new JScrollPane(viewComponent, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-                scrollPane.setPreferredSize(new Dimension(800, 600));
-
-                add(scrollPane, BorderLayout.CENTER); // Añadir al centro de la ventana
                 llenarSelectorEstaciones(graphStream);
 
                 revalidate(); // Refrescar la ventana
@@ -146,131 +189,184 @@ public class VisualizarGrafo extends JFrame {
         }
     }
 
-    // Método para mostrar el radio de cobertura basado en `t`
-    private void mostrarRadioCobertura() {
-        if (graphStream == null) {
-            System.err.println("Error: No se ha cargado ningún grafo.");
+//    Método para el radio de cobertura, se llama DFS o BFS dependiendo de la elección
+    private void mostrarRadioCobertura(boolean usarDFS) {
+        String estacionSeleccionada = (String) selectorEstaciones.getSelectedItem();
+
+        if (estacionSeleccionada == null) {
+            System.err.println("Error: No se ha seleccionado ninguna estación.");
             return;
         }
 
-        String estacionSeleccionada = (String) selectorEstaciones.getSelectedItem();
-        if (estacionSeleccionada != null) {
-            Node estacion = graphStream.getNode(estacionSeleccionada);
-            if (estacion != null) {
-                System.out.println("Estación seleccionada: " + estacion.getId());
-                // Aquí llamamos al método para calcular y mostrar el radio de cobertura
-                mostrarRadio(estacion, t);  // `t` es el número de estaciones de cobertura
+        Integer headIndex = listaGrafos.getHead();
+
+        if (headIndex != null) {
+            NodoArray pointer = listaGrafos.getArray()[headIndex];
+            while (pointer != null) {
+                Grafo grafo = (Grafo) pointer.getElement();
+                Nodo estacionPointer = grafo.getEstaciones().getHead();
+                while (estacionPointer != null) {
+                    Estacion estacion = estacionPointer.getEstacion();
+                    if (estacion.getNombre().equals(estacionSeleccionada)) {
+                        seleccionarEstacion(estacion);
+                        System.out.println("Estación seleccionada: " + estacion.getNombre());
+
+                        Set nodosEnRadio;
+                        if (usarDFS) {
+                            nodosEnRadio = calcularEstacionesEnRadioDFS(estacion, t, grafo);
+                        } else {
+                            nodosEnRadio = calcularEstacionesEnRadio(estacion, t, grafo);
+                        }
+
+                        configurarEstilos(grafo);
+                        mostrarCirculoDeCobertura(nodosEnRadio, grafo);
+                        return;
+                    }
+                    estacionPointer = estacionPointer.getNext();
+                }
+
+                if (pointer.getNext() != null) {
+                    pointer = listaGrafos.getArray()[pointer.getNext()];
+                } else {
+                    pointer = null;
+                }
             }
+        } else {
+            System.out.println("La lista de grafos está vacía.");
         }
     }
 
-    private Set calcularEstacionesEnRadio(Node estacionInicial, int t) {
+// Método de búsqueda DFS para calcular el radio de cobertura
+    private Set calcularEstacionesEnRadioDFS(Estacion estacionInicial, int t, Grafo grafo) {
         Set visitados = new Set();
-        Queue cola = new Queue();
+        Stack pila = new Stack();
         Map distancia = new Map();
 
-        // Recuperar la Estacion desde el Node usando el atributo
-        Estacion estacionInicialReal = estacionInicial.getAttribute("estacion", Estacion.class);
+        pila.push(estacionInicial);
+        distancia.put(estacionInicial, 0);
+        visitados.add(estacionInicial);
 
-        if (estacionInicialReal == null) {
-            System.err.println("Error: El nodo no tiene una estación asociada.");
-            return visitados; // Devolver un conjunto vacío en caso de error
-        }
+        while (!pila.isEmpty()) {
+            Estacion estacionActual = (Estacion) pila.pop().getElement();
+            int dist = distancia.get(estacionActual);
 
-        // Añadir la estación inicial a la cola y marcarla como visitada
-        cola.enqueue(estacionInicial);
-        distancia.put(estacionInicialReal, 0);
-        visitados.add(estacionInicialReal);
-
-        while (!cola.isEmpty()) {
-            Node estacionActual = (Node) cola.dequeue().getElement();
-            Estacion estacionActualReal = estacionActual.getAttribute("estacion", Estacion.class);
-
-            // Verificar si estacionActualReal es null
-            if (estacionActualReal == null) {
-                System.err.println("Error: El nodo actual no tiene una estación asociada.");
-                continue;  // Omitir este nodo
-            }
-
-            Integer dist = distancia.get(estacionActualReal);
-
-            // Si la distancia actual es mayor que t, no continuar
+            // Si se alcanza el limite, se para
             if (dist >= t) {
                 continue;
             }
 
-            // Iterar sobre las aristas conectadas al nodo actual
-            for (Edge arista : (Iterable<Edge>) estacionActual.edges()::iterator) {
-                Node vecino = arista.getOpposite(estacionActual);
-                Estacion vecinoEstacion = vecino.getAttribute("estacion", Estacion.class);
+            int estacionIndex = grafo.findEstacionIndex(estacionActual.getNombre());
+            if (estacionIndex == -1) {
+                continue;
+            }
 
-                if (vecinoEstacion != null && !visitados.contains(vecinoEstacion)) {
-                    distancia.put(vecinoEstacion, dist + 1);
-                    cola.enqueue(vecino);
-                    visitados.add(vecinoEstacion);
+            for (int j = 0; j < grafo.getNumVertices(); j++) {
+                if (grafo.getMatrizAdyacencia()[estacionIndex][j] == 1) { // Si hay conexión
+                    Estacion vecino = grafo.getEstaciones().obtener(j);
+
+                    if (!visitados.contains(vecino)) {
+                        distancia.put(vecino, dist + 1); // Se actualiza la distancia
+                        pila.push(vecino);               // Se agrega el vecino a la pila
+                        visitados.add(vecino);           // Se agrega el vecino a `visitados`
+                    }
                 }
             }
         }
 
+        System.out.println("Estaciones en el radio de cobertura de distancia " + t + " usando DFS:");
+        visitados.print();
+
         return visitados;
     }
 
-    // Método para calcular y mostrar el radio
-    private void mostrarRadio(Node estacion, int t) {
-        Set nodosEnRadio = calcularEstacionesEnRadio(estacion, t);
-        Queue queue = new Queue();
-        Map distancia = new Map();
+    // Método de búsqueda BFS para calcular el radio de cobertura
+    private Set calcularEstacionesEnRadio(Estacion estacionInicial, int t, Grafo grafo) {
+        Set visitados = new Set();      // Almacena estaciones visitadas
+        Queue cola = new Queue();       // Cola para BFS
+        Map distancia = new Map();      // Distancia desde la estación inicial
 
-        // Empezamos con la estación inicial
-        nodosEnRadio.add((Estacion) estacion);
-        queue.enqueue(estacion);
-        distancia.put((Estacion) estacion, 0);  // La distancia inicial de la estación es 0
+        cola.enqueue(estacionInicial);
+        distancia.put(estacionInicial, 0);
+        distancia.get(estacionInicial);
+        visitados.add(estacionInicial);
 
-        // Nivel de BFS (Distancia)
-        int nivel = 0;
+        while (!cola.isEmpty()) {
+            Estacion estacionActual = (Estacion) cola.dequeue().getElement();
+            System.out.println(estacionActual.getNombre());
+            int dist = distancia.get(estacionActual);
+            System.out.println(dist);
 
-        // Iteramos usando BFS hasta que el nivel sea mayor o igual a `t`
-        while (!queue.isEmpty() && nivel < t) {
-            int tamanoNivel = queue.getSize();  // Procesamos todos los nodos del nivel actual
-            for (int i = 0; i < tamanoNivel; i++) {
-                Node actual = (Node) queue.dequeue().getElement();  // Sacamos el nodo actual de la cola
-                int dist = distancia.get((Estacion) actual);  // Obtenemos la distancia del nodo actual
-
-                // Iteramos sobre las aristas (edges) del nodo actual
-                actual.edges().forEach(arista -> {
-                    // Obtenemos el nodo vecino a través de la arista
-                    Node vecino = arista.getOpposite(actual);
-
-                    // Si el vecino no ha sido visitado
-                    if (!nodosEnRadio.contains((Estacion) vecino)) {
-                        distancia.put((Estacion) vecino, dist + 1);  // Actualizamos la distancia del vecino
-                        queue.enqueue(vecino);  // Añadimos el vecino a la cola para procesar
-                        nodosEnRadio.add((Estacion) vecino);  // Añadimos el vecino a los nodos en el radio
-                    }
-                });
+            // Si hemos alcanzado el límite de distancia `t`, dejamos de explorar esta ruta
+            if (dist >= t) {
+                continue;
             }
-            nivel++;  // Aumentamos el nivel de BFS
+
+            // Obtener el índice de la estación actual en la lista de estaciones del grafo
+            int estacionIndex = grafo.findEstacionIndex(estacionActual.getNombre());
+            if (estacionIndex == -1) {
+                continue;  // Saltar si la estación no se encuentra en el grafo
+            }
+
+            // Iterar sobre la fila correspondiente en la matriz de adyacencia
+            for (int j = 0; j < grafo.getNumVertices(); j++) {
+                if (grafo.getMatrizAdyacencia()[estacionIndex][j] == 1) {  // Si hay conexión
+                    Estacion vecino = grafo.getEstaciones().obtener(j);
+
+                    // Agregar el vecino a los nodos visitados si aún no se ha procesado
+                    if (!visitados.contains(vecino)) {
+                        distancia.put(vecino, dist + 1); // Actualizamos la distancia
+                        cola.enqueue(vecino);
+                        visitados.add(vecino);           // Añadimos el vecino a `visitados`
+                    }
+                }
+            }
         }
 
-        // Finalmente, mostramos el círculo de cobertura con los nodos encontrados
-        mostrarCirculoDeCobertura(nodosEnRadio);
+        // Verificar qué estaciones fueron alcanzadas dentro del radio `t`
+        System.out.println("Estaciones en el radio de cobertura de distancia " + t + ":");
+        visitados.print();
+
+        return visitados;
     }
 
-    // Método para mostrar visualmente los nodos que están dentro del radio
-    private void mostrarCirculoDeCobertura(Set nodosEnRadio) {
-        // Restauramos el estilo de todos los nodos del grafo
-        for (org.graphstream.graph.Node nodo : graphStream) {
-            nodo.removeAttribute("ui.style");  // Restaurar el estilo a su estado original
+    // Método para mostrar el círculo de cobertura y estilizar los nodos alcanzados
+    private void mostrarCirculoDeCobertura(Set nodosEnRadio, Grafo grafo) {
+//        Establecer el predeterminado
+        Nodo estacionPointer = grafo.getEstaciones().getHead();
+        while (estacionPointer != null) {
+            Estacion estacion = estacionPointer.getEstacion();
+            Node nodo = grafo.toGraphStream().getNode(estacion.getNombre());
+
+            if (nodo != null) {
+                nodo.removeAttribute("ui.class");
+                nodo.setAttribute("ui.style", "fill-color: black; size: 15px;"); // Restaurar a estilo original
+            }
+
+            estacionPointer = estacionPointer.getNext();
         }
 
-        // Establecemos el estilo para los nodos dentro del radio de cobertura
+        // Aplicar estilo predeterminado a las estaciones abarcadas por el radio
+        int contadorEstaciones = 0;
         for (int i = 0; i < nodosEnRadio.size(); i++) {
-            org.graphstream.graph.Node nodoEnRadio = (org.graphstream.graph.Node) nodosEnRadio.obtener(i).getEstacion();
-            nodoEnRadio.setAttribute("ui.style", "fill-color: rgba(0, 0, 255, 0.5); size: 20px;");
+            Estacion estacionEnRadio = (Estacion) nodosEnRadio.obtener(i).getEstacion();
+            Node nodoRadio = grafo.toGraphStream().getNode(estacionEnRadio.getNombre());
+
+            if (nodoRadio != null) {
+                nodoRadio.setAttribute("ui.class", "enRadio"); // Asignar la clase `enRadio`
+                nodoRadio.setAttribute("ui.style", "fill-color: blue; size: 25px; stroke-mode: plain; stroke-color: blue; stroke-width: 3px;");
+                contadorEstaciones++;
+            }
         }
+
+        // Refrescar la vista del grafo para que los cambios sean visibles
+        revalidate();
+        repaint();
+
+        // Muestra el número total de estaciones en el radio de cobertura en la consola
+        System.out.println("Número de estaciones en el radio de cobertura: " + contadorEstaciones);
     }
 
-    // Habilitar el zoom usando la rueda del ratón
+// Habilitar el zoom usando la rueda del ratón
     private void habilitarZoom(Viewer viewer) {
         View view = viewer.getDefaultView();
         Component viewComponent = (Component) view;
@@ -280,9 +376,6 @@ public class VisualizarGrafo extends JFrame {
             double factor = e.getPreciseWheelRotation() > 0 ? 1.1 : 0.9;
             camera.setViewPercent(camera.getViewPercent() * factor); // Ajustar el zoom
 
-            // Añadido: Ajustar las barras de desplazamiento cuando se hace zoom
-            scrollPane.getViewport().revalidate();
-            scrollPane.getViewport().repaint();
         });
     }
 
@@ -292,16 +385,84 @@ public class VisualizarGrafo extends JFrame {
         double increment = 1.0;
 
         for (Node node : graphStream) {
-            node.setAttribute("xyz", posX, 0.0, 0.0); // Asignar coordenadas X e Y
+            node.setAttribute("xyz", posX, 0.0, 0.0);
             posX += increment;
+        }
+    }
+
+//    Almacena estaciones seleccionadas
+    private void seleccionarEstacion(Estacion estacion) {
+        if (!estacionesSeleccionadas.contains(estacion)) {
+            estacionesSeleccionadas.add(estacion);
+            selectorEstacionesSeleccionadas.addItem(estacion.getNombre());
+            actualizarEstiloEstacion(estacion, "seleccionada");
+        }
+    }
+
+//    Método para deseleccionar estaciones seleccionadas
+    private void deseleccionarEstacion() {
+        String estacionNombre = (String) selectorEstacionesSeleccionadas.getSelectedItem();
+        if (estacionNombre != null) {
+            Estacion estacion = obtenerEstacionPorNombre(estacionNombre);
+
+            if (estacion != null) {
+                estacionesSeleccionadas.remove(estacion);
+                selectorEstacionesSeleccionadas.removeItem(estacionNombre);
+                actualizarEstiloEstacion(estacion, "default");
+            } else {
+                System.err.println("Error: La estación a deseleccionar no se encontró.");
+            }
+        } else {
+            System.err.println("Error: No se seleccionó ninguna estación.");
+        }
+    }
+
+//    Buscar estación por nombre
+    private Estacion obtenerEstacionPorNombre(String nombre) {
+        if (nombre == null) {
+            System.err.println("Error: El nombre de la estación a buscar es nulo.");
+            return null;
+        }
+
+        Nodo pointer = lineas.getHead();
+        while (pointer != null) {
+            Estacion estacion = pointer.getEstacion();
+
+            // Verificamos que la estación y su nombre no sean nulos
+            if (estacion != null && nombre.equalsIgnoreCase(estacion.getNombre())) {
+                return estacion;
+            }
+
+            pointer = pointer.getNext();
+        }
+
+        // Mensaje si no se encuentra la estación
+        System.err.println("Error: No se encontró la estación con el nombre " + nombre);
+        return null;
+    }
+
+    private void actualizarEstiloEstacion(Estacion estacion, String estilo) {
+        if (estacion == null || estacion.getNombre() == null) { // Verificar nulos
+            System.err.println("Error: La estación es nula o no tiene nombre.");
+            return; // Salir si la estación es nula o no tiene nombre
+        }
+
+        Node nodo = graphStream.getNode(estacion.getNombre());
+        if (nodo != null) {
+            if ("seleccionada".equals(estilo)) {
+                nodo.setAttribute("ui.class", "seleccionada");
+                nodo.setAttribute("ui.style", "fill-color: blue; size: 15px; stroke-mode: plain; stroke-color: green; stroke-width: 3px;");
+            } else {
+                nodo.setAttribute("ui.style", "fill-color: black; size: 5px;"); // Estilo predeterminado
+            }
+        } else {
+            System.err.println("Error: No se encontró el nodo en el grafo.");
         }
     }
 
     public static void inicializarVentanaConGrafos(ListaArray listaGrafos, Lista lineas, int t) {
         new VisualizarGrafo(listaGrafos, lineas, t);
     }
-
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {

@@ -1,11 +1,12 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Clase Nodo específica para las colas
+ * 
  */
 package proyecto1.cobertura.util;
 
 /**
- *
+ * Constructor del nodo que toma variables de tipo Objeto
+ * 
  * @author sebas
  */
 public class NodoQueue {

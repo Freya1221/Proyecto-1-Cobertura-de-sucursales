@@ -1,11 +1,13 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Clase para trabajar con colas junto a todos sus métodos
+ * 
  */
 package proyecto1.cobertura.util;
 
 /**
- *
+ * Constructor toma un NodoQueue, que es un nodo para trabajar las colas
+ * Diferente al nodo base porque el nodo base trabaja con el tipo Estación
+ * 
  * @author sebas
  */
 public class Queue {

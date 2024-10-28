@@ -1,11 +1,13 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Nodo para trabajar con las listas y los maps
+ * 
  */
 package proyecto1.cobertura.util;
 
 /**
- *
+ * Constructor toma elementos de diferente tipo para ampliar
+ * versatilidad
+ * 
  * @author sebas
  */
 public class Nodo {

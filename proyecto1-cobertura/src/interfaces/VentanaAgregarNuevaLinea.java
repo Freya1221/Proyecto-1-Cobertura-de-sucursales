@@ -1,6 +1,6 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ * Con esta interfaz se puede agregar una nueva 
+ * Línea al sistema
  */
 package interfaces;
 
@@ -12,7 +12,9 @@ import proyecto1.cobertura.util.Lista;
 import proyecto1.cobertura.util.ListaArray;
 
 /**
- *
+ * Constructor que toma la lista de grafos y la los nombres de líneas
+ * Obtenidos en la interfaz1
+ * 
  * @author sebas
  */
 public class VentanaAgregarNuevaLinea extends javax.swing.JFrame {
@@ -22,14 +24,15 @@ public class VentanaAgregarNuevaLinea extends javax.swing.JFrame {
     private Lista nombresLineas;
 
     /**
-     * Creates new form VentanaAgregarNuevaLinea
+     * Tomamos la lista de todos los grafos y tambien del 
+     * nombre de las estaciones
      *
      * @param grafos
      * @param nombresLineas
      */
     public VentanaAgregarNuevaLinea(ListaArray grafos, Lista nombresLineas) {
-        this.grafos = grafos; // Inicializa con valores por defecto
-        this.nombresLineas = nombresLineas;      // Inicializa con valores por defecto
+        this.grafos = grafos; 
+        this.nombresLineas = nombresLineas;      
 
         initComponents();
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -128,7 +131,7 @@ public class VentanaAgregarNuevaLinea extends javax.swing.JFrame {
         String estaciones = EstacionesTextArea.getText();
         String conexion = ConexionTextField.getText();
 
-        // Validación básica
+        // Validación básica para que agreguen todos los datos
         if (nombreLinea.isEmpty() || estaciones.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos obligatorios.");
             return;
@@ -140,7 +143,7 @@ public class VentanaAgregarNuevaLinea extends javax.swing.JFrame {
 
         // Agregar las estaciones al grafo
         for (String estacion : listaEstaciones) {
-            String nombreEstacion = estacion.trim(); // Remover espacios extra
+            String nombreEstacion = estacion.trim(); 
             grafo.addEstacion(nombreLinea, nombreEstacion);  // Agregar cada estación
             System.out.println("Estación agregada: " + nombreEstacion);
         }
@@ -148,7 +151,7 @@ public class VentanaAgregarNuevaLinea extends javax.swing.JFrame {
         // Inicializar la matriz de adyacencia para la nueva línea
         grafo.inicializarMatriz(grafo.getEstaciones().getSize());
 
-        // Establecer conexiones entre estaciones consecutivas
+        // Establecer conexiones 
         for (int j = 0; j < listaEstaciones.length - 1; j++) {
             String estacion1 = listaEstaciones[j].trim();  // Primera estación
             String estacion2 = listaEstaciones[j + 1].trim();  // Estación siguiente
